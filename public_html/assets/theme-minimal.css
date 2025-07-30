@@ -1,0 +1,115 @@
+/* theme-minimal.css - Minimalist Theme for TechNest */
+body {
+    font-family: 'Helvetica Neue', Arial, sans-serif;
+    background: #fff;
+    color: #111;
+    margin: 0;
+    padding: 0;
+}
+header, footer {
+    background: #fff;
+    color: #111;
+    border-bottom: 1px solid #eee;
+    padding: 1em 0;
+    text-align: center;
+}
+nav a {
+    color: #111;
+    margin: 0 1em;
+    text-decoration: none;
+    font-weight: 400;
+    border-bottom: 2px solid transparent;
+    transition: border 0.2s;
+}
+nav a:hover {
+    border-bottom: 2px solid #111;
+}
+main {
+    max-width: 900px;
+    margin: 2em auto;
+    padding: 1em;
+    background: #fafafa;
+    border-radius: 8px;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.03);
+}
+.product-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 2em;
+    margin: 2em 0;
+}
+.product-card {
+    background: #fff;
+    border: 1px solid #eee;
+    border-radius: 8px;
+    padding: 1em;
+    text-align: center;
+}
+.product-card img {
+    max-width: 100%;
+    border-radius: 4px;
+}
+form input, form select, form textarea, form button {
+    font-size: 1em;
+    margin: 0.5em 0;
+    padding: 0.5em;
+    border-radius: 4px;
+    border: 1px solid #ccc;
+    width: 100%;
+    box-sizing: border-box;
+}
+form button {
+    background: #111;
+    color: #fff;
+    border: none;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+form button:hover {
+    background: #444;
+}
+.input-error {
+    border: 2px solid #e53935;
+    background: #fff5f5;
+}
+@media (max-width: 600px) {
+    main {
+        padding: 0.5em;
+    }
+    .product-grid {
+        grid-template-columns: 1fr;
+    }
+}
+/* Hamburger menu styles */
+#menu-toggle {
+    background: none;
+    border: none;
+    font-size: 2em;
+    color: #111;
+    cursor: pointer;
+    margin-right: 1em;
+    display: none;
+}
+@media (max-width: 700px) {
+    nav #main-nav {
+        display: none;
+        flex-direction: column;
+        background: #fff;
+        position: absolute;
+        top: 60px;
+        left: 0;
+        width: 100%;
+        z-index: 1000;
+    }
+    nav #main-nav.open {
+        display: flex;
+    }
+    #menu-toggle {
+        display: inline-block;
+    }
+    nav a {
+        margin: 1em 0;
+        padding: 1em;
+        border-bottom: 1px solid #eee;
+    }
+} 

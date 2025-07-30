@@ -1,0 +1,151 @@
+/* theme-holiday.css - Holiday Theme for TechNest */
+
+/* Base styles */
+body {
+    font-family: 'Segoe UI', Arial, sans-serif;
+    background: #fff9f7;
+    /* lighter warm background */
+    color: #3a1a00;
+    /* dark warm brown */
+    margin: 0;
+    padding: 0;
+}
+
+/* Header and footer */
+header,
+footer {
+    background: #8b0000;
+    /* deep holiday red */
+    color: #fff8f0;
+    padding: 1em 0;
+    text-align: center;
+    box-shadow: 0 0 10px #b22222cc;
+    /* subtle glowing red */
+}
+
+/* Navigation links */
+nav a {
+    color: #fff8f0;
+    margin: 0 1em;
+    text-decoration: none;
+    font-weight: 600;
+    transition: color 0.3s;
+}
+
+nav a:hover {
+    color: #ffd700;
+    /* festive gold */
+    text-decoration: underline;
+}
+
+/* Main content area */
+main {
+    max-width: 900px;
+    margin: 2em auto;
+    padding: 1em;
+    background: #fff8f2;
+    /* warm cream */
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(139, 0, 0, 0.1);
+}
+
+/* Product grid and cards */
+.product-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 2em;
+    margin: 2em 0;
+}
+
+.product-card {
+    background: #faf0e6;
+    /* light warm tan */
+    border-radius: 8px;
+    padding: 1em;
+    text-align: center;
+    box-shadow: 0 1px 6px rgba(139, 0, 0, 0.05);
+    border: 1px solid #deb887;
+    /* light brown border */
+}
+
+.product-card img {
+    max-width: 100%;
+    border-radius: 4px;
+    filter: drop-shadow(0 0 2px #8b0000cc);
+}
+
+/* Form elements */
+form input,
+form select,
+form textarea,
+form button {
+    font-size: 1em;
+    margin: 0.5em 0;
+    padding: 0.5em;
+    border-radius: 4px;
+    border: 1px solid #b22222;
+    /* festive red border */
+    width: 100%;
+    box-sizing: border-box;
+    background: #fff8f0;
+    color: #3a1a00;
+}
+
+form button {
+    background: #b22222;
+    /* holiday red */
+    color: #fff8f0;
+    border: none;
+    cursor: pointer;
+    transition: background 0.3s;
+}
+
+form button:hover {
+    background: #800000;
+    /* darker red */
+}
+
+/* Validation error style */
+.input-error {
+    border: 2px solid #d32f2f;
+    background: #fff0f0;
+}
+
+/* Hamburger menu styles */
+#menu-toggle {
+    background: none;
+    border: none;
+    font-size: 2em;
+    color: #fff8f0;
+    cursor: pointer;
+    margin-right: 1em;
+    display: none;
+}
+
+/* Responsive styles for mobile */
+@media (max-width: 700px) {
+    nav #main-nav {
+        display: none;
+        flex-direction: column;
+        background: #8b0000;
+        position: absolute;
+        top: 60px;
+        left: 0;
+        width: 100%;
+        z-index: 1000;
+    }
+
+    nav #main-nav.open {
+        display: flex;
+    }
+
+    #menu-toggle {
+        display: inline-block;
+    }
+
+    nav a {
+        margin: 1em 0;
+        padding: 1em;
+        border-bottom: 1px solid #600000;
+    }
+}

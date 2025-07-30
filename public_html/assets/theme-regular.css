@@ -1,0 +1,121 @@
+/* theme-regular.css - Default TechNest Theme */
+
+/* Base styles */
+body {
+    font-family: 'Segoe UI', Arial, sans-serif;
+    background: #f7f7fa;
+    color: #222;
+    margin: 0;
+    padding: 0;
+}
+
+/* Header and footer */
+header, footer {
+    background: #222;
+    color: #fff;
+    padding: 1em 0;
+    text-align: center;
+}
+
+/* Navigation links */
+nav a {
+    color: #fff;
+    margin: 0 1em;
+    text-decoration: none;
+    font-weight: 500;
+}
+nav a:hover {
+    text-decoration: underline;
+}
+
+/* Main content area */
+main {
+    max-width: 900px;
+    margin: 2em auto;
+    padding: 1em;
+    background: #fff;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+}
+
+/* Product grid and cards */
+.product-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 2em;
+    margin: 2em 0;
+}
+.product-card {
+    background: #f0f0f5;
+    border-radius: 8px;
+    padding: 1em;
+    text-align: center;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.04);
+}
+.product-card img {
+    max-width: 100%;
+    border-radius: 4px;
+}
+
+/* Form elements */
+form input, form select, form textarea, form button {
+    font-size: 1em;
+    margin: 0.5em 0;
+    padding: 0.5em;
+    border-radius: 4px;
+    border: 1px solid #ccc;
+    width: 100%;
+    box-sizing: border-box;
+}
+form button {
+    background: #222;
+    color: #fff;
+    border: none;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+form button:hover {
+    background: #444;
+}
+
+/* Validation error style */
+.input-error {
+    border: 2px solid #e53935;
+    background: #fff5f5;
+}
+
+/* Hamburger menu styles */
+#menu-toggle {
+    background: none;
+    border: none;
+    font-size: 2em;
+    color: #fff;
+    cursor: pointer;
+    margin-right: 1em;
+    display: none;
+}
+
+/* Responsive styles for mobile */
+@media (max-width: 700px) {
+    nav #main-nav {
+        display: none;
+        flex-direction: column;
+        background: #222;
+        position: absolute;
+        top: 60px;
+        left: 0;
+        width: 100%;
+        z-index: 1000;
+    }
+    nav #main-nav.open {
+        display: flex;
+    }
+    #menu-toggle {
+        display: inline-block;
+    }
+    nav a {
+        margin: 1em 0;
+        padding: 1em;
+        border-bottom: 1px solid #333;
+    }
+} 
