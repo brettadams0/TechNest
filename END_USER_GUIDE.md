@@ -272,4 +272,4 @@ TechNest works best with:
 
 ---
 
-**Need more help?** Visit the Help section or contact customer support for assistance with any issues not covered in this guide. 
+**Need more help?** Visit the Help section or contact me at adamsbrett00@gmail.com.
