@@ -11,9 +11,7 @@ This guide provides comprehensive instructions for managing the TechNest e-comme
 4. [User Management](#user-management)
 5. [Order Management](#order-management)
 6. [Theme Management](#theme-management)
-7. [System Monitoring](#system-monitoring)
-8. [Security Best Practices](#security-best-practices)
-9. [Troubleshooting](#troubleshooting)
+7. [Troubleshooting](#troubleshooting)
 
 ## Admin Access
 
@@ -98,12 +96,6 @@ Many products have customizable options:
 - **Remove options**: Delete unwanted options
 - **Reorder options**: Change display order
 
-### Product Images
-- **Image requirements**: Use consistent sizing and format
-- **File paths**: Store images in `/assets/` directory
-- **Naming convention**: Use descriptive filenames
-- **Optimization**: Compress images for faster loading
-
 ## User Management
 
 ### Accessing User Management
@@ -174,25 +166,6 @@ The order management page shows:
 3. **Check inventory** for ordered products
 4. **Update status** to "Processing" when ready
 
-#### Processing Orders
-1. **Prepare items** for shipping
-2. **Update order status** to "Shipped" when dispatched
-3. **Add tracking information** if available
-4. **Notify customer** of shipping status
-
-#### Completed Orders
-1. **Mark as "Delivered"** when customer receives
-2. **Archive order** for record keeping
-3. **Follow up** with customer if needed
-
-### Order Status Management
-Available statuses:
-- **Pending**: Order received, awaiting processing
-- **Processing**: Order being prepared
-- **Shipped**: Order dispatched to customer
-- **Delivered**: Order received by customer
-- **Cancelled**: Order cancelled (with reason)
-
 ### Order Details View
 Clicking on an order shows:
 - **Customer information**: Name, email, contact details
@@ -236,44 +209,6 @@ To add custom themes:
 3. **Test theme** thoroughly before activation
 4. **Document theme** for future reference
 
-## System Monitoring
-
-### Accessing System Monitor
-1. **Navigate to**: `/monitor.php`
-2. **View system status** and performance metrics
-
-### Monitor Features
-- **Database status**: Connection and performance
-- **Server information**: PHP version, server details
-- **System health**: Error logs and warnings
-- **Performance metrics**: Response times and load
-
-### Regular Monitoring Tasks
-- **Check error logs** for issues
-- **Monitor database performance**
-- **Review system resources**
-- **Verify backup systems**
-
-## Security Best Practices
-
-### Admin Account Security
-- **Use strong passwords**: Include letters, numbers, symbols
-- **Change passwords regularly**: Every 30-90 days
-- **Limit admin access**: Only grant to trusted users
-- **Log out when finished**: Especially on shared computers
-
-### Data Protection
-- **Backup regularly**: Database and files
-- **Monitor user activity**: Watch for suspicious behavior
-- **Update security**: Keep system patched
-- **Encrypt sensitive data**: Use HTTPS and secure connections
-
-### Access Control
-- **Admin-only areas**: Restrict access to admin functions
-- **Session management**: Proper logout and timeout
-- **IP restrictions**: Limit admin access to specific IPs if needed
-- **Audit logging**: Track admin actions
-
 ## Troubleshooting
 
 ### Common Admin Issues
@@ -315,44 +250,6 @@ To add custom themes:
 - **Caching**: Implement page caching if needed
 - **CDN usage**: Use content delivery networks for assets
 
-## Maintenance Tasks
-
-### Daily Tasks
-- **Check new orders**: Process pending orders
-- **Monitor system**: Review error logs
-- **Backup data**: Create daily backups
-
-### Weekly Tasks
-- **Review user accounts**: Check for suspicious activity
-- **Update product information**: Keep prices and descriptions current
-- **Clean up data**: Remove old/duplicate records
-
-### Monthly Tasks
-- **Security audit**: Review access logs
-- **Performance review**: Analyze system metrics
-- **Backup verification**: Test backup restoration
-- **Update documentation**: Keep guides current
-
-## Emergency Procedures
-
-### System Outage
-1. **Check server status**: Verify hosting service
-2. **Review error logs**: Identify cause of outage
-3. **Contact hosting provider**: Report issues
-4. **Notify users**: Post status updates
-
-### Data Loss
-1. **Stop all operations**: Prevent further data loss
-2. **Assess damage**: Determine what data is affected
-3. **Restore from backup**: Use most recent backup
-4. **Verify restoration**: Test system functionality
-
-### Security Breach
-1. **Change admin passwords**: Immediately update all passwords
-2. **Review access logs**: Identify unauthorized access
-3. **Contact security team**: Report incident
-4. **Notify affected users**: If customer data compromised
-
 ---
 
-**Need Admin Support?** Contact your system administrator or hosting provider for technical assistance beyond the scope of this guide. 
+**Need Admin Support?** Contact me at adamsbrett00@gmail.com.
