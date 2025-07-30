@@ -9,8 +9,8 @@ INSERT INTO themes (name, css_file, is_active) VALUES
 
 -- Insert users
 INSERT INTO users (username, email, password_hash, is_active) VALUES
-('admin', 'admin@technest.com', '$2a$12$SK41ruYMGrpgJ.O9iDqRNO9sihZHyGs7EGI6AlFFiHpQIc3WpPlNa', TRUE),
-('adams63', 'adams63@uwindsor.ca', '$2a$12$SK41ruYMGrpgJ.O9iDqRNO9sihZHyGs7EGI6AlFFiHpQIc3WpPlNa', TRUE);
+('admin', 'admin@technest.com', 'HIDDEN', TRUE),
+('adams63', 'adams63@uwindsor.ca', 'HIDDEN', TRUE);
 
 -- Make admin user
 INSERT INTO admin (user_id) VALUES (1);
