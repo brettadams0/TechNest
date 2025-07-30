@@ -1,5 +1,5 @@
 -- db_schema.sql
--- T04: MySQL Database Design for TechNest
+
 -- This schema supports 20+ products, options, users, orders, admin, and themes
 
 -- Users table
