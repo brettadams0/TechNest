@@ -1,5 +1,4 @@
 -- db_seed.sql
--- T05: Populate TechNest database with sample data
 
 -- Insert themes
 INSERT INTO themes (name, css_file, is_active) VALUES
