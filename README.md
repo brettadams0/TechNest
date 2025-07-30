@@ -21,4 +21,4 @@ TechNest is a dynamic PHP/MySQL web application for buying electronics (phones, 
 ## Deployment
 Designed for hosting on myweb.cs.uwindsor.ca or any LAMP-compatible server.
 
-See the [About page](about.php) for the business case description. 
+See the guides for application descriptions. 
