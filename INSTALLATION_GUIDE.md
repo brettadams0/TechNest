@@ -25,14 +25,6 @@ This guide provides step-by-step instructions for installing TechNest on any web
 - **Memory**: 512MB RAM minimum
 - **Storage**: 100MB available space
 
-### Recommended Requirements
-- **PHP**: 8.1 or higher
-- **MySQL**: 8.0 or higher
-- **Web Server**: Apache 2.4+ with mod_rewrite
-- **Memory**: 1GB RAM or more
-- **Storage**: 500MB available space
-- **SSL Certificate**: For secure HTTPS connections
-
 ### PHP Extensions Required
 - **PDO**: For database connectivity
 - **PDO_MySQL**: MySQL database driver
@@ -73,7 +65,7 @@ This guide provides step-by-step instructions for installing TechNest on any web
 
 #### Step 2: Upload to Server
 1. **Connect to your server** via FTP/SFTP
-2. **Navigate to web root** (e.g., `/public_html/`, `/var/www/html/`)
+2. **Navigate to web root** (e.g., `/public_html/`)
 3. **Upload all files** maintaining directory structure
 4. **Verify upload** - all files should be present
 
@@ -85,7 +77,7 @@ This guide provides step-by-step instructions for installing TechNest on any web
 cd /var/www/html/
 
 # Clone the repository
-git clone https://github.com/your-repo/technest.git
+git clone https://github.com/brettadams0/TechNest.git
 
 # Set proper ownership
 chown -R www-data:www-data technest/
@@ -451,4 +443,4 @@ tar -czf technest_backup_$(date +%Y%m%d).tar.gz \
 
 ---
 
-**Need Help?** If you encounter issues during installation, check the troubleshooting section above or contact your system administrator for assistance. 
+**Need Help?** If you encounter issues during installation, check the troubleshooting section above or contact me at adamsbrett00@gmail.com. 
