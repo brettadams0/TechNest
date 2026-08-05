@@ -10,6 +10,14 @@ require_once __DIR__ . '/config.php';
  */
 function get_db(): PDO
 {
+    // Fail with a message that names the cause. Without this, an unset
+    // environment produces a bare "connection failed" that looks like the
+    // database is down rather than unconfigured.
+    if (DB_NAME === '' || DB_USER === '') {
+        die('Database is not configured. Set DB_NAME, DB_USER and DB_PASS '
+            . 'in the environment — see INSTALLATION_GUIDE.md.');
+    }
+
     try {
         $dsn = 'mysql:host=' . DB_HOST . ';dbname=' . DB_NAME . ';charset=utf8mb4';
         $pdo = new PDO($dsn, DB_USER, DB_PASS, [
