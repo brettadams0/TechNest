@@ -51,7 +51,14 @@ final class CheckoutController
         }
 
         if ($v->fails() || $postal === null) {
-            return $this->form($this->pricer->price($this->cart), $v->errors(), $request->body, 422);
+            // Re-pricing reconciles the cart; if that changed anything, say
+            // so on the cart page rather than quietly showing a smaller order.
+            $priced = $this->pricer->price($this->cart);
+            if ($priced->isEmpty() || $priced->notices !== []) {
+                return $this->backToCart($priced);
+            }
+
+            return $this->form($priced, $v->errors(), $request->body, 422);
         }
 
         $user = $this->auth->user();
@@ -60,7 +67,12 @@ final class CheckoutController
         }
 
         try {
-            $orderId = $this->checkout->placeOrder($user, $this->cart, new ShippingAddress($name, $street, $city, $province, $postal));
+            $orderId = $this->checkout->placeOrder(
+                $user,
+                $this->cart,
+                new ShippingAddress($name, $street, $city, $province, $postal),
+                $request->input('cart_fingerprint'),
+            );
         } catch (CheckoutException $e) {
             $this->flash->error($e->getMessage());
 

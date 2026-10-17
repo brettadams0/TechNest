@@ -22,6 +22,7 @@ use TechNest\User\User;
 final class CheckoutServiceTest extends DatabaseTestCase
 {
     private CheckoutService $checkout;
+    private CartPricer $pricer;
     private OrderRepository $orders;
     private ProductRepository $products;
     private User $customer;
@@ -32,12 +33,8 @@ final class CheckoutServiceTest extends DatabaseTestCase
         parent::setUp();
         $this->products = new ProductRepository($this->db, $this->clock);
         $this->orders = new OrderRepository($this->db);
-        $this->checkout = new CheckoutService(
-            $this->db,
-            new CartPricer($this->products, new PriceCalculator()),
-            $this->orders,
-            $this->clock,
-        );
+        $this->pricer = new CartPricer($this->products, new PriceCalculator());
+        $this->checkout = new CheckoutService($this->db, $this->pricer, $this->orders, $this->clock);
         $this->customer = $this->fixtures->user();
         $this->address = new ShippingAddress('Alice Example', '401 Sunset Ave', 'Windsor', 'ON', 'N9B 3P4');
     }
@@ -104,6 +101,46 @@ final class CheckoutServiceTest extends DatabaseTestCase
 
         self::assertNotNull($order);
         self::assertSame(50000, $order->subtotalCents);
+    }
+
+    public function testAPriceChangeAfterTheCustomerReviewedTheCartIsStopped(): void
+    {
+        $phone = $this->fixtures->phone(stock: 3);
+        $cart = $this->cartWith($phone, ['Color' => 'Black', 'Storage' => '128GB'], 1);
+        $reviewed = $this->pricer->price($cart)->fingerprint();
+
+        $this->db->execute('UPDATE products SET price_cents = price_cents + 100 WHERE id = ?', [$phone->id]);
+
+        try {
+            $this->checkout->placeOrder($this->customer, $cart, $this->address, $reviewed);
+            self::fail('An order must not be placed at a price the customer did not see');
+        } catch (CheckoutException $e) {
+            self::assertStringContainsString('Your cart changed since you reviewed it', $e->getMessage());
+        }
+        self::assertSame(3, $this->fixtures->stock($phone->id));
+        self::assertSame(0, $this->fixtures->count('orders'));
+
+        $this->checkout->placeOrder($this->customer, $cart, $this->address, $this->pricer->price($cart)->fingerprint());
+        self::assertSame(1, $this->fixtures->count('orders'));
+    }
+
+    public function testTheLongestOptionLabelsTheAdminFormAllowsCanBeOrdered(): void
+    {
+        // Regression: MySQL stored the label in VARCHAR(255) while the admin
+        // form allows any number of 40-character groups with 60-character
+        // values, so a configured PC failed to check out on MySQL only.
+        $options = [];
+        foreach (['Processor', 'Graphics card', 'Memory', 'Storage'] as $group) {
+            $options[str_pad($group, 40, '.')] = [[str_repeat('x', 60), 0]];
+        }
+        $pc = $this->fixtures->product(['options' => $options]);
+        $cart = new Cart(new ArraySession());
+        $cart->add($pc->id, array_map(static fn($o): int => $o->id, $pc->options), 1);
+
+        $order = $this->orders->find($this->checkout->placeOrder($this->customer, $cart, $this->address));
+
+        self::assertNotNull($order);
+        self::assertGreaterThan(255, strlen($order->items[0]->optionsLabel));
     }
 
     public function testOrderLinesAreSnapshotsThatSurviveCatalogEdits(): void

@@ -52,7 +52,10 @@ final class OrderService
             }
 
             if ($to === OrderStatus::Cancelled) {
-                foreach ($order->items as $item) {
+                // Product-id order, the same as checkout, so the two cannot deadlock.
+                $items = $order->items;
+                usort($items, static fn(OrderItem $a, OrderItem $b): int => $a->productId <=> $b->productId);
+                foreach ($items as $item) {
                     $this->db->execute('UPDATE products SET stock = stock + ? WHERE id = ?', [$item->quantity, $item->productId]);
                 }
             }

@@ -36,6 +36,9 @@ $featured = $old !== [] ? $this->old($old, 'is_featured') === '1' : ($product->i
 <div class="product-editor">
     <form class="card" method="post" action="<?= $editing ? '/admin/products/' . $product->id : '/admin/products' ?>" novalidate>
         <?= $this->csrfField() ?>
+        <?php if ($editing): ?>
+            <input type="hidden" name="stock_original" value="<?= $this->e($value('stock_original', (string) $product->stock)) ?>">
+        <?php endif ?>
         <?php if ($errors !== []): ?>
             <div class="alert alert--error" role="alert"><?= $this->icon('alert') ?><p>Please fix the highlighted fields.</p></div>
         <?php endif ?>

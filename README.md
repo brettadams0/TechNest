@@ -65,9 +65,10 @@ The parts worth reading, and where to find them:
 
 - **Checkout is a single transaction** — [`CheckoutService`](src/Checkout/CheckoutService.php). It
   re-prices the cart from the database (the session holds only ids and quantities, never prices),
-  takes stock with `UPDATE … SET stock = stock - ? WHERE id = ? AND stock >= ?` so two customers
-  cannot both buy the last unit, writes one order line per cart line with the name, options and
-  price snapshotted, and records the first history entry. Any failure rolls all of it back; a test
+  refuses to go ahead if that no longer matches the cart the customer reviewed, takes stock with
+  `UPDATE … SET stock = stock - ? WHERE id = ? AND stock >= ?` so two customers cannot both buy the
+  last unit, writes one order line per cart line with the name, options and price snapshotted, and
+  records the first history entry. Any failure rolls all of it back; a test
   injects a failure with a database trigger halfway through and checks that the stock already taken
   comes back, on both SQLite and MySQL.
 - **The order lifecycle is a state machine** — [`OrderStatus`](src/Order/OrderStatus.php). The

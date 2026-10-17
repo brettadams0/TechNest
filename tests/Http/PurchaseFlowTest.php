@@ -45,7 +45,7 @@ final class PurchaseFlowTest extends HttpTestCase
         $this->assertSee('Enter a Canadian postal code', $invalid);
         $this->assertSee('401 Sunset Ave', $invalid);
 
-        $placed = $this->post('/checkout', $this->address());
+        $placed = $this->checkout($this->address());
         $location = (string) $placed->header('Location');
         self::assertMatchesRegularExpression('#^/account/orders/\d+$#', $location);
         self::assertSame(2, $this->fixtures->stock($this->phone->id));
@@ -79,13 +79,46 @@ final class PurchaseFlowTest extends HttpTestCase
         $owner = $this->fixtures->user('owner');
         $this->actingAs($owner);
         $this->post('/cart/add', ['product_id' => (string) $this->phone->id, 'options' => ['Color' => (string) $this->phone->options[0]->id, 'Storage' => (string) $this->phone->options[2]->id]]);
-        $location = (string) $this->post('/checkout', $this->address())->header('Location');
+        $location = (string) $this->checkout($this->address())->header('Location');
 
         $this->actingAs($this->fixtures->user('snoop'));
 
         $this->assertStatus(404, $this->get($location));
         $this->post($location . '/cancel');
         self::assertSame('pending', $this->db->fetchValue('SELECT status FROM orders'));
+    }
+
+    public function testAPriceChangeAfterReviewSendsTheCustomerBackToTheCart(): void
+    {
+        $this->actingAs($this->fixtures->user());
+        $this->post('/cart/add', ['product_id' => (string) $this->phone->id, 'options' => ['Color' => (string) $this->phone->options[0]->id, 'Storage' => (string) $this->phone->options[2]->id]]);
+        $page = $this->get('/checkout');
+        preg_match('/name="cart_fingerprint" value="([0-9a-f]{64})"/', $page->body, $m);
+
+        // The price goes up while the customer is typing their address.
+        $this->db->execute('UPDATE products SET price_cents = price_cents + 10000 WHERE id = ?', [$this->phone->id]);
+        $response = $this->post('/checkout', $this->address() + ['cart_fingerprint' => $m[1] ?? '']);
+
+        $this->assertRedirect('/cart', $response);
+        $this->assertSee('Your cart changed since you reviewed it.', $this->get('/cart'));
+        self::assertSame(0, $this->db->fetchInt('SELECT COUNT(*) FROM orders'));
+        self::assertSame(4, $this->fixtures->stock($this->phone->id));
+
+        // Having seen the new price, the customer can go ahead.
+        self::assertMatchesRegularExpression('#^/account/orders/\d+$#', (string) $this->checkout($this->address())->header('Location'));
+    }
+
+    public function testAFormErrorDoesNotHideACartThatShrank(): void
+    {
+        $this->actingAs($this->fixtures->user());
+        $this->post('/cart/add', ['product_id' => (string) $this->phone->id, 'options' => ['Color' => (string) $this->phone->options[0]->id, 'Storage' => (string) $this->phone->options[2]->id], 'quantity' => '3']);
+        $this->assertStatus(200, $this->get('/checkout'));
+
+        $this->db->execute('UPDATE products SET stock = 1 WHERE id = ?', [$this->phone->id]);
+        $response = $this->post('/checkout', $this->address(['postal_code' => 'nope']));
+
+        $this->assertRedirect('/cart', $response);
+        $this->assertSee('Only 1 Pixel Test left in stock', $this->get('/cart'));
     }
 
     public function testAnEmptyCartCannotReachCheckout(): void

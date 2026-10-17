@@ -25,6 +25,7 @@ sensitive email adamsbrett00@gmail.com.
 | A stolen session outliving a password change | Each account has a session version, bumped on password change; sessions holding an older one are signed out on their next request | `Auth::user()`, `UserRepository::changePassword()` |
 | Open redirect after login | `?next=` and the stored intended URL accept same-site paths only | `SafeRedirect` |
 | Price tampering | The session stores no prices; totals are recomputed from the database inside the checkout transaction; option ids are validated against the product | `Cart`, `CartPricer`, `OptionSelection` |
+| Charging for a cart the customer did not review | The checkout form carries a fingerprint of the lines and prices it showed; a price change or a cart edited in another tab sends the customer back to the cart instead of placing the order | `PricedCart::fingerprint()`, `CheckoutService` |
 | Overselling under concurrency | Stock is taken with an atomic conditional update inside the order transaction | `CheckoutService` |
 | Information leakage | No PHP or Apache version headers; error detail only when `APP_DEBUG` is on; `/health` reports up/down only | `Dockerfile`, `Application`, `PageController` |
 | Malicious uploads | There are no uploads; product images are chosen from files that ship with the store | `Admin\ProductController` |

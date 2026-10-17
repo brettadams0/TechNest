@@ -13,6 +13,7 @@ $this->layout('layout', ['title' => 'Checkout']);
 <div class="checkout">
     <form class="card checkout__form" method="post" action="/checkout" novalidate>
         <?= $this->csrfField() ?>
+        <input type="hidden" name="cart_fingerprint" value="<?= $this->e($cart->fingerprint()) ?>">
         <?php if ($errors !== []): ?>
             <div class="alert alert--error" role="alert"><?= $this->icon('alert') ?><p>Please fix the highlighted fields.</p></div>
         <?php endif ?>

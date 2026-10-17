@@ -63,6 +63,39 @@ final class AdminTest extends HttpTestCase
         self::assertSame(0, $this->fixtures->count('product_options'));
     }
 
+    public function testSavingTheProductFormDoesNotUndoSalesMadeWhileItWasOpen(): void
+    {
+        $product = $this->fixtures->product(['name' => 'Kindle Test', 'stock' => 40]);
+        $form = $this->productForm($product->id);
+        self::assertSame('40', $form['stock_original']);
+
+        // A customer buys 3 while the admin is fixing a typo.
+        $this->db->execute('UPDATE products SET stock = 37 WHERE id = ?', [$product->id]);
+        $this->assertRedirect("/admin/products/{$product->id}/edit", $this->post("/admin/products/{$product->id}", ['description' => 'Fixed typo'] + $form));
+
+        self::assertSame(37, $this->fixtures->stock($product->id));
+        self::assertSame('Fixed typo', $this->db->fetchValue('SELECT description FROM products WHERE id = ?', [$product->id]));
+    }
+
+    public function testAStockEditThatRacedASaleIsShownBackInsteadOfSaved(): void
+    {
+        $product = $this->fixtures->product(['name' => 'Kindle Test', 'stock' => 40]);
+        $form = $this->productForm($product->id);
+
+        $this->db->execute('UPDATE products SET stock = 37 WHERE id = ?', [$product->id]);
+        $response = $this->post("/admin/products/{$product->id}", ['name' => 'Kindle Renamed', 'stock' => '50'] + $form);
+
+        $this->assertStatus(409, $response);
+        $this->assertSee('Stock changed to 37 while you were editing', $response);
+        self::assertSame(37, $this->fixtures->stock($product->id));
+        self::assertSame('Kindle Test', $this->db->fetchValue('SELECT name FROM products WHERE id = ?', [$product->id]));
+
+        // Saving the re-shown form applies the admin's figure.
+        self::assertSame(1, preg_match('/name="stock_original" value="(\d+)"/', $response->body, $m));
+        $this->post("/admin/products/{$product->id}", ['name' => 'Kindle Renamed', 'stock' => '50', 'stock_original' => $m[1]] + $form);
+        self::assertSame(50, $this->fixtures->stock($product->id));
+    }
+
     public function testArchivingHidesAProductWithoutDeletingIt(): void
     {
         $product = $this->fixtures->product(['slug' => 'to-archive']);
@@ -82,7 +115,7 @@ final class AdminTest extends HttpTestCase
         $product = $this->fixtures->product(['stock' => 1]);
         $this->actingAs($customer);
         $this->post('/cart/add', ['product_id' => (string) $product->id]);
-        $this->post('/checkout', ['name' => 'Cy Customer', 'street' => '1 Main St', 'city' => 'Windsor', 'province' => 'ON', 'postal_code' => 'N9B3P4']);
+        $this->checkout(['name' => 'Cy Customer', 'street' => '1 Main St', 'city' => 'Windsor', 'province' => 'ON', 'postal_code' => 'N9B3P4']);
         $this->actingAs($this->admin);
 
         $this->post('/admin/orders/1/status', ['status' => 'delivered']);
@@ -130,5 +163,31 @@ final class AdminTest extends HttpTestCase
     public function testDashboardRendersWithAndWithoutSales(): void
     {
         $this->assertSee('No sales in this period.', $this->get('/admin'));
+    }
+
+    /**
+     * The edit form's fields as the browser would submit them.
+     *
+     * @return array<string, string>
+     */
+    private function productForm(int $id): array
+    {
+        $html = $this->get("/admin/products/{$id}/edit")->body;
+        $fields = [];
+        preg_match_all('/<input[^>]*\bname="([a-z_]+)"[^>]*\bvalue="([^"]*)"[^>]*>/', $html, $inputs, PREG_SET_ORDER);
+        foreach ($inputs as [$tag, $name, $value]) {
+            if (!str_contains($tag, 'type="checkbox"') || str_contains($tag, ' checked')) {
+                $fields[$name] = html_entity_decode($value);
+            }
+        }
+        preg_match_all('/<select[^>]*\bname="([a-z_]+)".*?<option value="([^"]*)" selected/s', $html, $selects, PREG_SET_ORDER);
+        foreach ($selects as [, $name, $value]) {
+            $fields[$name] = html_entity_decode($value);
+        }
+        preg_match('/<textarea[^>]*name="description"[^>]*>(.*?)<\/textarea>/s', $html, $description);
+        $fields['description'] = html_entity_decode($description[1] ?? '');
+        unset($fields['_token'], $fields['value'], $fields['group'], $fields['extra'], $fields['q']);
+
+        return $fields;
     }
 }

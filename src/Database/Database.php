@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace TechNest\Database;
 
 use PDO;
+use PDOException;
 use PDOStatement;
 use TechNest\Config;
 use Throwable;
@@ -18,6 +19,8 @@ use Throwable;
  */
 final class Database
 {
+    private int $depth = 0;
+
     public function __construct(private readonly PDO $pdo) {}
 
     public static function connect(Config $config, string $rootDir): self
@@ -142,6 +145,13 @@ final class Database
      * Run $work inside a transaction, committing on return and rolling back on
      * any exception. Nested calls join the outer transaction.
      *
+     * On SQLite the transaction is BEGIN IMMEDIATE, which takes the write lock
+     * up front. PDO's default is DEFERRED, and a deferred transaction that has
+     * read (every caller here reads before it writes) cannot upgrade to a
+     * writer while another connection is writing: SQLite fails at once with
+     * "database is locked" without waiting out busy_timeout. Taking the lock
+     * first makes concurrent checkouts queue instead of failing.
+     *
      * @template T
      *
      * @param callable(self): T $work
@@ -150,19 +160,58 @@ final class Database
      */
     public function transaction(callable $work): mixed
     {
-        if ($this->pdo->inTransaction()) {
+        // Counted here rather than asked of PDO: PDO::inTransaction() does
+        // not see a transaction begun with exec('BEGIN IMMEDIATE').
+        if ($this->depth > 0) {
             return $work($this);
         }
 
-        $this->pdo->beginTransaction();
+        $this->begin();
+        $this->depth = 1;
         try {
             $result = $work($this);
-            $this->pdo->commit();
+            $this->commit();
 
             return $result;
         } catch (Throwable $e) {
-            $this->pdo->rollBack();
+            $this->rollBack();
             throw $e;
+        } finally {
+            $this->depth = 0;
+        }
+    }
+
+    private function begin(): void
+    {
+        if ($this->driver() === 'sqlite') {
+            $this->pdo->exec('BEGIN IMMEDIATE');
+        } else {
+            $this->pdo->beginTransaction();
+        }
+    }
+
+    private function commit(): void
+    {
+        if ($this->driver() === 'sqlite') {
+            $this->pdo->exec('COMMIT');
+        } else {
+            $this->pdo->commit();
+        }
+    }
+
+    private function rollBack(): void
+    {
+        if ($this->driver() !== 'sqlite') {
+            $this->pdo->rollBack();
+
+            return;
+        }
+
+        try {
+            $this->pdo->exec('ROLLBACK');
+        } catch (PDOException) {
+            // SQLite already rolled back on its own (it does for some errors);
+            // the exception that got us here is the one worth reporting.
         }
     }
 

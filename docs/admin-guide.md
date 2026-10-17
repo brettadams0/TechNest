@@ -45,6 +45,9 @@ the first.
 - **Options**: after creating a product, add option groups on its edit page — for example group
   *Storage*, choice *256GB*, extra *100.00*. Customers must choose one value from every group.
   Removing an option makes any cart holding it ask the customer to choose again.
+- **Stock** keeps moving while the edit page is open, as customers check out and orders are
+  cancelled. Saving the page leaves stock alone unless you changed it; if you did and it moved in
+  the meantime, the page comes back showing the current figure so you can decide again.
 - **Featured** products appear on the homepage.
 - **Archive** hides a product from the store without deleting it, so past orders keep their lines.
   Restore it from the same button.

@@ -72,7 +72,15 @@ final class ProductController
             return $this->form($product, $errors, $request->body, 422);
         }
 
-        $this->products->update($product->id, $data);
+        // A form without stock_original (not ours) gets last-write-wins.
+        $stockSeen = $request->inputInt('stock_original', $product->stock);
+        if (!$this->products->update($product->id, $data, $stockSeen)) {
+            $current = $this->find($id);
+
+            return $this->form($current, [
+                'stock' => "Stock changed to {$current->stock} while you were editing (orders and cancellations move it). Check the figure and save again.",
+            ], ['stock_original' => (string) $current->stock] + $request->body, 409);
+        }
         $this->flash->success("{$data['name']} was saved.");
 
         return Response::redirect("/admin/products/{$product->id}/edit");

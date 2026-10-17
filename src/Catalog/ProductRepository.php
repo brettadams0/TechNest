@@ -176,19 +176,35 @@ final class ProductRepository
         );
     }
 
-    /** @param array{category_id: int, slug: string, name: string, description: string, image: ?string, price_cents: int, stock: int, is_featured: bool} $data */
-    public function update(int $id, array $data): void
+    /**
+     * Save the edit form. Stock moves underneath an open form (checkouts take
+     * it, cancellations return it), so it is only written when the admin
+     * changed it, and then only if it still holds the value the form showed.
+     * Writing it back unconditionally would undo every sale made meanwhile.
+     *
+     * @param array{category_id: int, slug: string, name: string, description: string, image: ?string, price_cents: int, stock: int, is_featured: bool} $data
+     * @param int $stockSeen the stock the form was showing
+     *
+     * @return bool false if stock was changed meanwhile; nothing is saved then
+     */
+    public function update(int $id, array $data, int $stockSeen): bool
     {
-        $this->db->execute(
-            'UPDATE products
-                SET category_id = ?, slug = ?, name = ?, description = ?, image = ?,
-                    price_cents = ?, stock = ?, is_featured = ?, updated_at = ?
-              WHERE id = ?',
-            [
-                $data['category_id'], $data['slug'], $data['name'], $data['description'], $data['image'],
-                $data['price_cents'], $data['stock'], $data['is_featured'] ? 1 : 0, $this->now(), $id,
-            ],
-        );
+        $params = [
+            $data['category_id'], $data['slug'], $data['name'], $data['description'], $data['image'],
+            $data['price_cents'], $data['is_featured'] ? 1 : 0, $this->now(),
+        ];
+        $set = 'category_id = ?, slug = ?, name = ?, description = ?, image = ?, price_cents = ?, is_featured = ?, updated_at = ?';
+
+        if ($data['stock'] === $stockSeen) {
+            $this->db->execute("UPDATE products SET {$set} WHERE id = ?", [...$params, $id]);
+
+            return true;
+        }
+
+        return $this->db->execute(
+            "UPDATE products SET {$set}, stock = ? WHERE id = ? AND stock = ?",
+            [...$params, $data['stock'], $id, $stockSeen],
+        ) === 1;
     }
 
     /**

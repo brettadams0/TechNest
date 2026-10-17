@@ -56,6 +56,21 @@ abstract class HttpTestCase extends DatabaseTestCase
         return $this->app->handle(new Request('POST', $path, [], $data, ['REMOTE_ADDR' => '203.0.113.7']));
     }
 
+    /**
+     * Open the checkout page and submit its form, as a browser would: the form
+     * carries the fingerprint of the cart it showed.
+     *
+     * @param array<string, string> $address
+     */
+    protected function checkout(array $address): Response
+    {
+        $page = $this->get('/checkout');
+        self::assertSame(200, $page->status, 'The checkout page should open');
+        self::assertSame(1, preg_match('/name="cart_fingerprint" value="([0-9a-f]{64})"/', $page->body, $m), 'The checkout form carries a cart fingerprint');
+
+        return $this->post('/checkout', $address + ['cart_fingerprint' => $m[1]]);
+    }
+
     protected function actingAs(User $user): void
     {
         $this->session->set('user_id', $user->id);

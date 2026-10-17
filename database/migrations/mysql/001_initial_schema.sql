@@ -109,7 +109,7 @@ CREATE TABLE order_items (
     order_id         INT UNSIGNED NOT NULL,
     product_id       INT UNSIGNED NOT NULL,
     product_name     VARCHAR(120) NOT NULL,
-    options_label    VARCHAR(255) NOT NULL DEFAULT '',
+    options_label    TEXT         NOT NULL,
     unit_price_cents INT UNSIGNED NOT NULL,
     quantity         INT UNSIGNED NOT NULL,
     line_total_cents INT UNSIGNED NOT NULL,

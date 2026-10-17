@@ -110,7 +110,9 @@ admin's typed `1,199.99` into `119999` with string operations only.
 **The session holds no prices.** The cart stores product ids, option ids and quantities. Prices are
 read from the database whenever the cart is displayed and again inside the checkout transaction, so
 there is nothing in client-controlled state that can change what an order costs. The same
-re-pricing reconciles the cart with the catalog and reports what changed.
+re-pricing reconciles the cart with the catalog and reports what changed. The checkout form carries
+a fingerprint of the lines, quantities, unit prices and total it showed; if the re-priced cart no
+longer matches it, the order is not placed and the customer is sent back to the cart to see why.
 
 **Order lines are snapshots.** `order_items` copies the product name, the chosen options as text,
 and the unit price. Renaming or repricing a product later never rewrites a past order, and deleting
@@ -132,7 +134,17 @@ MySQL runs in strict mode with `ONLY_FULL_GROUP_BY`, the strictest common config
 
 **Stock is taken with a conditional update.** `UPDATE … WHERE stock >= ?` is atomic in both
 engines, and its affected-row count says whether the stock was still there. That is enough to stop
-overselling without explicit row locks, and it behaves the same way on SQLite and MySQL.
+overselling without explicit row locks. Rows are always updated in product-id order, by checkout and
+by restocking alike, so two transactions touching the same products cannot deadlock on MySQL. The
+admin product form follows the same rule from the other side: it writes stock only when the admin
+changed it, and only if it still holds the figure the form showed, so saving a typo fix never puts
+sold units back on sale.
+
+**SQLite transactions take the write lock first.** PDO starts SQLite transactions as `DEFERRED`,
+and a deferred transaction that has already read cannot become a writer while another connection is
+writing: SQLite fails it immediately rather than waiting out `busy_timeout`. Every transaction here
+reads before it writes, so `Database::transaction()` issues `BEGIN IMMEDIATE` on SQLite and
+concurrent checkouts queue instead of failing.
 
 **Server-rendered charts.** The dashboard's charts are SVG built in PHP. That avoids a charting
 library, needs nothing from the Content-Security-Policy, prints correctly, and lets each theme's CSS

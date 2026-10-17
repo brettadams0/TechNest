@@ -27,7 +27,7 @@ A rebuild of the original coursework into a production-shaped application. Highl
 - Login throttling per account and IP, shared by the password-change form; sessions signed out
   when the account's password changes.
 - Transactional checkout with atomic stock decrement, price snapshots, Canadian address validation,
-  shipping and HST.
+  shipping and HST; an order is only placed for the cart and prices the customer reviewed.
 - Order lifecycle state machine with audit history, restocking on cancel, and customer cancellation.
 - Catalog search, category filter, sorting and pagination; product options with live pricing.
 - Admin dashboard with period-over-period KPIs and server-rendered SVG charts; product options

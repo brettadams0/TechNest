@@ -6,6 +6,7 @@ namespace TechNest\Checkout;
 
 use TechNest\Cart\Cart;
 use TechNest\Cart\CartPricer;
+use TechNest\Cart\PricedLine;
 use TechNest\Database\Database;
 use TechNest\Order\OrderRepository;
 use TechNest\Order\OrderStatus;
@@ -15,7 +16,8 @@ use TechNest\User\User;
 /**
  * Places an order as a single transaction:
  *
- *  1. re-price the cart from the database (the session holds no prices);
+ *  1. re-price the cart from the database (the session holds no prices) and
+ *     check it is still the cart the customer reviewed;
  *  2. take stock with a conditional UPDATE … WHERE stock >= qty, which is
  *     atomic, so two customers racing for the last unit cannot both get it;
  *  3. write the order, one line per cart line, with name/options/price
@@ -34,10 +36,15 @@ final class CheckoutService
         private readonly Clock $clock,
     ) {}
 
-    /** @throws CheckoutException */
-    public function placeOrder(User $customer, Cart $cart, ShippingAddress $address): int
+    /**
+     * @param string|null $reviewed the PricedCart::fingerprint() of the cart
+     *                              the customer was shown; null skips the check
+     *
+     * @throws CheckoutException
+     */
+    public function placeOrder(User $customer, Cart $cart, ShippingAddress $address, ?string $reviewed = null): int
     {
-        $orderId = $this->db->transaction(function () use ($customer, $cart, $address): int {
+        $orderId = $this->db->transaction(function () use ($customer, $cart, $address, $reviewed): int {
             $priced = $this->pricer->price($cart);
 
             if ($priced->notices !== []) {
@@ -48,8 +55,17 @@ final class CheckoutService
             if ($priced->isEmpty()) {
                 throw new CheckoutException('Your cart is empty.');
             }
+            if ($reviewed !== null && !hash_equals($priced->fingerprint(), $reviewed)) {
+                // A price changed, or the cart was changed in another tab.
+                throw new CheckoutException('Your cart changed since you reviewed it. Please check it before placing your order.');
+            }
 
-            foreach ($priced->lines as $line) {
+            // Lock rows in product-id order: two checkouts taking the same
+            // products in different orders would otherwise deadlock on MySQL.
+            $byProduct = $priced->lines;
+            usort($byProduct, static fn(PricedLine $a, PricedLine $b): int => $a->product->id <=> $b->product->id);
+
+            foreach ($byProduct as $line) {
                 $taken = $this->db->execute(
                     'UPDATE products SET stock = stock - ? WHERE id = ? AND is_active = 1 AND stock >= ?',
                     [$line->quantity, $line->product->id, $line->quantity],
