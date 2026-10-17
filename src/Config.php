@@ -113,6 +113,17 @@ final class Config
         return new DateTimeZone($name);
     }
 
+    /**
+     * TRUSTED_PROXIES: comma-separated addresses or CIDR blocks of the reverse
+     * proxies in front of the app, e.g. "10.0.0.0/8, 172.16.0.0/12".
+     *
+     * @return list<string>
+     */
+    public function trustedProxies(): array
+    {
+        return array_values(array_filter(array_map('trim', explode(',', $this->get('TRUSTED_PROXIES'))), static fn(string $r): bool => $r !== ''));
+    }
+
     public function dbDriver(): string
     {
         $driver = $this->get('DB_DRIVER', 'sqlite');

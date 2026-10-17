@@ -1,7 +1,7 @@
 # TechNest
 
 [![CI](https://github.com/brettadams0/TechNest/actions/workflows/ci.yml/badge.svg)](https://github.com/brettadams0/TechNest/actions/workflows/ci.yml)
-[![PHP 8.2–8.4](https://img.shields.io/badge/PHP-8.2%20%E2%80%93%208.4-777bb4.svg)](https://www.php.net/)
+[![PHP 8.2–8.5](https://img.shields.io/badge/PHP-8.2%20%E2%80%93%208.5-777bb4.svg)](https://www.php.net/)
 [![PHPStan level max](https://img.shields.io/badge/PHPStan-level%20max-2a5ea7.svg)](phpstan.neon.dist)
 [![SQLite & MySQL 8](https://img.shields.io/badge/DB-SQLite%20%7C%20MySQL%208-4479a1.svg)](database/migrations)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
@@ -44,6 +44,10 @@ otherwise.
 ```sh
 docker compose up --build    # http://localhost:8080
 ```
+
+The image serves plain HTTP on port 80, so HTTPS means a TLS-terminating proxy in front of it. Set
+`TRUSTED_PROXIES` to that proxy's address: the session cookie then gets `Secure`, HSTS is sent, and
+login throttling sees each visitor's address rather than the proxy's.
 
 ## What it does
 
@@ -125,9 +129,10 @@ through a checkout with a trigger); with binary logging on, MySQL also requires 
 `log_bin_trust_function_creators=1`, and the test is skipped with that reason otherwise.
 
 The HTTP suite drives the whole application in-process — routing, CSRF, guards, controllers,
-templates and a real database — with no web server. [CI](.github/workflows/ci.yml) runs the suite on
-PHP 8.2, 8.3 and 8.4 against SQLite and on PHP 8.3 against MySQL 8.4, and builds the Docker image
-and smoke-tests it.
+templates and a real database — with no web server. Templates count as source, so a warning or
+deprecation raised while rendering fails the run. [CI](.github/workflows/ci.yml) runs the suite on
+PHP 8.2 to 8.5 against SQLite and on PHP 8.3 against MySQL 8.4, and builds the Docker image and
+smoke-tests it.
 
 ## Layout
 
@@ -160,6 +165,7 @@ Settings come from the environment, or a `.env` file — see [`.env.example`](.e
 | `APP_ENV` | `local` | `production` disables demo seeding and error detail |
 | `APP_DEBUG` | on outside production | show exception messages on error pages |
 | `APP_TIMEZONE` | `America/Toronto` | dates on screen, and the days the dashboard reports by |
+| `TRUSTED_PROXIES` | — | addresses or CIDR blocks of a TLS-terminating proxy, whose `X-Forwarded-Proto`/`-For` are then believed |
 | `DB_DRIVER` | `sqlite` | `sqlite` or `mysql` |
 | `DB_PATH` | `var/technest.sqlite` | SQLite only |
 | `DB_HOST`, `DB_PORT`, `DB_NAME`, `DB_USER`, `DB_PASS` | — | MySQL only; there are deliberately no defaults |
@@ -180,7 +186,7 @@ For production: `APP_ENV=production php bin/technest db:setup`, then create an a
 | Prices as floats; no stock, so nothing stopped overselling | Integer cents; stock taken atomically |
 | 20 products shared 3 hotlinked stock photos, broken offline | Illustrations generated for each product and served locally |
 | `monitor.php` showed the PHP version to anyone | `/health` reports up or down and nothing else |
-| No tests, no CI | 200+ tests on SQLite and MySQL, PHPStan at max, CI on three PHP versions |
+| No tests, no CI | 250+ tests on SQLite and MySQL, PHPStan at max, CI on four PHP versions |
 
 ## Limitations
 

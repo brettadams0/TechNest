@@ -4,7 +4,13 @@ declare(strict_types=1);
 
 namespace TechNest\Tests\Http;
 
+use TechNest\Application;
+use TechNest\Config;
+use TechNest\Database\Database;
+use TechNest\Http\Request;
+use TechNest\Security\ArraySession;
 use TechNest\Tests\Support\HttpTestCase;
+use TechNest\Tests\Support\TestDatabase;
 
 final class StorefrontTest extends HttpTestCase
 {
@@ -67,6 +73,17 @@ final class StorefrontTest extends HttpTestCase
         self::assertSame('application/json', $response->header('Content-Type'));
         self::assertSame(['status' => 'ok', 'database' => 'ok'], json_decode($response->body, true));
         self::assertStringNotContainsString(PHP_VERSION, $response->body);
+    }
+
+    public function testHealthReportsADatabaseThatWasNeverMigrated(): void
+    {
+        // Regression: /health ran SELECT 1, so an empty database reported ok.
+        $app = new Application(TestDatabase::root(), Config::fromArray(['APP_ENV' => 'testing']), Database::sqlite(), new ArraySession(), $this->clock);
+
+        $response = $app->handle(new Request('GET', '/health'));
+
+        $this->assertStatus(503, $response);
+        self::assertSame(['status' => 'degraded', 'database' => 'not set up'], json_decode($response->body, true));
     }
 
     public function testProductPageOffersEveryOptionWithTheFirstSelected(): void

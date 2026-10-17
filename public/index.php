@@ -28,7 +28,7 @@ require $root . '/vendor/autoload.php';
 ini_set('display_errors', '0');
 
 $config = Config::fromEnvironment($root);
-$request = Request::fromGlobals();
+$request = Request::fromGlobals($config->trustedProxies());
 
 $unavailable = static function (string $message): never {
     http_response_code(503);
@@ -43,6 +43,11 @@ try {
         $unavailable('The database has not been created yet. Run `composer setup`, then reload.');
     }
     $db = Database::connect($config, $root);
+    // A database that exists but was never migrated (an empty SQLite file,
+    // a fresh MySQL schema) gets the same answer as a missing one.
+    if (!$db->tableExists('migrations')) {
+        $unavailable('The database has not been set up yet. Run `composer setup`, then reload.');
+    }
 } catch (Throwable $e) {
     error_log('[technest] database: ' . $e->getMessage());
     $unavailable($config->debug() ? $e->getMessage() : 'The store could not reach its database.');

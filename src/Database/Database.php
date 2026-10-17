@@ -82,6 +82,13 @@ final class Database
         return $this->pdo;
     }
 
+    public function tableExists(string $table): bool
+    {
+        return $this->driver() === 'sqlite'
+            ? $this->fetchInt("SELECT COUNT(*) FROM sqlite_master WHERE type = 'table' AND name = ?", [$table]) > 0
+            : $this->fetchInt('SELECT COUNT(*) FROM information_schema.tables WHERE table_schema = DATABASE() AND table_name = ?', [$table]) > 0;
+    }
+
     /**
      * @param array<int|string, mixed> $params
      *

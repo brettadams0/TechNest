@@ -25,6 +25,10 @@
     <source restrictNotices="true" restrictWarnings="true" ignoreIndirectDeprecations="true">
         <include>
             <directory>src</directory>
+            <!-- Templates are included by View, so their warnings and
+                 deprecations only fail the run if they are listed here. -->
+            <directory suffix=".php">templates</directory>
+            <file>public/index.php</file>
         </include>
     </source>
     <php>

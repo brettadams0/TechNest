@@ -32,7 +32,9 @@ final class PageController
     public function health(Request $request): Response
     {
         try {
-            $this->db->fetchValue('SELECT 1');
+            if (!$this->db->tableExists('migrations')) {
+                return Response::json(['status' => 'degraded', 'database' => 'not set up'], 503);
+            }
 
             return Response::json(['status' => 'ok', 'database' => 'ok']);
         } catch (Throwable) {

@@ -27,10 +27,26 @@ use TechNest\User\UserRepository;
 $root = dirname(__DIR__);
 require $root . '/vendor/autoload.php';
 
+// $_SERVER['argv'] rather than the $argv global, which PHP 8.5's CLI no
+// longer registers by default.
+$argv = is_array($_SERVER['argv'] ?? null) ? array_values(array_filter($_SERVER['argv'], 'is_string')) : [];
 $args = array_slice($argv, 1);
 $command = array_shift($args) ?? 'help';
 $flags = array_values(array_filter($args, static fn(string $a): bool => str_starts_with($a, '--')));
 $args = array_values(array_filter($args, static fn(string $a): bool => !str_starts_with($a, '--')));
+
+const HELP = <<<'HELP'
+    TechNest CLI
+
+      db:setup                         migrate, and seed if the catalog is empty
+      db:migrate                       apply pending migrations
+      db:seed                          seed the catalog (and demo data outside production)
+      db:reset [--force]               drop all tables and set up again
+      user:create <user> <email> [--admin]
+                                       password from TECHNEST_PASSWORD or a prompt
+      user:grant-admin <user>
+    HELP;
+const COMMANDS = ['db:setup', 'db:migrate', 'db:seed', 'db:reset', 'user:create', 'user:grant-admin'];
 
 function out(string $line): void
 {
@@ -41,6 +57,18 @@ function fail(string $line): never
 {
     fwrite(STDERR, "error: {$line}" . PHP_EOL);
     exit(1);
+}
+
+// Answer help and typos before connecting: with SQLite, connecting creates
+// the database file, and a typo in a deploy script must fail, not print help
+// and exit 0.
+if (in_array($command, ['help', '--help', '-h'], true)) {
+    out(HELP);
+    exit(0);
+}
+if (!in_array($command, COMMANDS, true)) {
+    fwrite(STDERR, HELP . PHP_EOL);
+    fail("unknown command '{$command}'");
 }
 
 $config = Config::fromEnvironment($root);
@@ -145,18 +173,6 @@ try {
             out("{$user->username} is now an administrator.");
             break;
 
-        default:
-            out(<<<'HELP'
-                TechNest CLI
-
-                  db:setup                         migrate, and seed if the catalog is empty
-                  db:migrate                       apply pending migrations
-                  db:seed                          seed the catalog (and demo data outside production)
-                  db:reset [--force]               drop all tables and set up again
-                  user:create <user> <email> [--admin]
-                                                   password from TECHNEST_PASSWORD or a prompt
-                  user:grant-admin <user>
-                HELP);
     }
 } catch (Throwable $e) {
     fail($e->getMessage());

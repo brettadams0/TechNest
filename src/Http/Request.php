@@ -15,6 +15,10 @@ final class Request
      * @param array<string, mixed>  $query
      * @param array<string, mixed>  $body
      * @param array<string, string> $server
+     * @param list<string>          $trustedProxies addresses or CIDR blocks of
+     *                                              reverse proxies whose
+     *                                              X-Forwarded-* headers are
+     *                                              believed
      */
     public function __construct(
         public readonly string $method,
@@ -22,9 +26,11 @@ final class Request
         public readonly array $query = [],
         public readonly array $body = [],
         public readonly array $server = [],
+        public readonly array $trustedProxies = [],
     ) {}
 
-    public static function fromGlobals(): self
+    /** @param list<string> $trustedProxies */
+    public static function fromGlobals(array $trustedProxies = []): self
     {
         $uri = $_SERVER['REQUEST_URI'] ?? '/';
         $path = parse_url(is_string($uri) ? $uri : '/', PHP_URL_PATH);
@@ -44,6 +50,7 @@ final class Request
             self::stringKeys($_GET),
             self::stringKeys($_POST),
             $server,
+            $trustedProxies,
         );
     }
 
@@ -145,16 +152,47 @@ final class Request
         return $out;
     }
 
+    /**
+     * The client's address. Behind a trusted reverse proxy that is the last
+     * address in X-Forwarded-For that is not one of our own proxies; anything
+     * further left was written by the client and proves nothing. Without a
+     * trusted proxy the header is ignored entirely, since anyone can send it.
+     */
     public function ip(): string
     {
-        return $this->server['REMOTE_ADDR'] ?? '0.0.0.0';
+        $remote = $this->server['REMOTE_ADDR'] ?? '0.0.0.0';
+        if (!$this->fromTrustedProxy()) {
+            return $remote;
+        }
+
+        $hops = array_reverse(array_map('trim', explode(',', $this->server['HTTP_X_FORWARDED_FOR'] ?? '')));
+        foreach ($hops as $hop) {
+            if (filter_var($hop, FILTER_VALIDATE_IP) === false) {
+                break;
+            }
+            if (!IpRange::matchesAny($hop, $this->trustedProxies)) {
+                return $hop;
+            }
+        }
+
+        return $remote;
     }
 
+    /** HTTPS, either here or, behind a trusted proxy, at the proxy. */
     public function isSecure(): bool
     {
+        if ($this->fromTrustedProxy() && isset($this->server['HTTP_X_FORWARDED_PROTO'])) {
+            return strtolower(trim(explode(',', $this->server['HTTP_X_FORWARDED_PROTO'])[0])) === 'https';
+        }
+
         $https = $this->server['HTTPS'] ?? '';
 
         return ($https !== '' && $https !== 'off') || ($this->server['SERVER_PORT'] ?? '') === '443';
+    }
+
+    private function fromTrustedProxy(): bool
+    {
+        return $this->trustedProxies !== [] && IpRange::matchesAny($this->server['REMOTE_ADDR'] ?? '', $this->trustedProxies);
     }
 
     /** Path plus query string, for "send me back here after login". */

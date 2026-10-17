@@ -206,12 +206,21 @@ final class ProductController
         ]), $status);
     }
 
-    /** @return list<string> */
+    /**
+     * The artwork that ships with the store. Listed with scandir rather than
+     * glob(GLOB_BRACE), which does not exist on musl (Alpine) builds of PHP.
+     *
+     * @return list<string>
+     */
     private function images(): array
     {
-        $files = glob($this->imageDir . '/*.{svg,webp,png,jpg}', GLOB_BRACE) ?: [];
-        $names = array_map('basename', $files);
-        $names = array_values(array_filter($names, static fn(string $n): bool => $n !== 'placeholder.svg'));
+        $dir = $this->imageDir;
+        $names = array_values(array_filter(
+            scandir($dir) ?: [],
+            static fn(string $n): bool => $n !== 'placeholder.svg'
+                && in_array(strtolower(pathinfo($n, PATHINFO_EXTENSION)), ['svg', 'webp', 'png', 'jpg'], true)
+                && is_file($dir . '/' . $n),
+        ));
         sort($names);
 
         return $names;

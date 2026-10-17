@@ -57,6 +57,12 @@ final class ConfigTest extends TestCase
         Config::fromArray(['APP_TIMEZONE' => 'Mars/Olympus'])->timezone();
     }
 
+    public function testTrustedProxiesAreACommaSeparatedList(): void
+    {
+        self::assertSame([], Config::fromArray([])->trustedProxies());
+        self::assertSame(['10.0.0.0/8', '172.16.0.0/12'], Config::fromArray(['TRUSTED_PROXIES' => ' 10.0.0.0/8 ,172.16.0.0/12, '])->trustedProxies());
+    }
+
     public function testRejectsUnknownDrivers(): void
     {
         $this->expectException(RuntimeException::class);

@@ -1,0 +1,8 @@
+# LF everywhere, whatever the checkout platform: the container entrypoint's
+# shebang breaks with CRLF, and the coding standard rejects CRLF in PHP.
+* text=auto eol=lf
+
+*.webp binary
+*.png binary
+*.jpg binary
+*.sqlite binary

@@ -40,7 +40,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        php: ['8.2', '8.3', '8.4']
+        php: ['8.2', '8.3', '8.4', '8.5']
     steps:
       - uses: actions/checkout@v4
 
@@ -59,6 +59,13 @@ jobs:
       - name: PHPUnit with coverage
         if: matrix.php == '8.3'
         run: vendor/bin/phpunit --coverage-text --only-summary-for-coverage-text
+
+      # The quality job pins 8.3; PHPStan's view of the code also depends on
+      # the runtime (8.5 stopped registering $argv by default), so check the
+      # newest one too.
+      - name: PHPStan on the newest PHP
+        if: matrix.php == '8.5'
+        run: composer analyse
 
   tests-mysql:
     name: Tests · PHP 8.3 · MySQL 8.4
