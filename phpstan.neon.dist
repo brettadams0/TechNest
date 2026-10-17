@@ -1,0 +1,15 @@
+includes:
+    - vendor/phpstan/phpstan-phpunit/extension.neon
+
+parameters:
+    level: max
+    paths:
+        - src
+        - tests
+        - public/index.php
+        - bin/technest
+    # Templates are plain PHP rendered inside View::renderFile(); their
+    # variables are documented with @var docblocks and analysed there.
+    scanDirectories:
+        - templates
+    tmpDir: var/phpstan
