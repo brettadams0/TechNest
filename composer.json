@@ -1,0 +1,73 @@
+{
+    "name": "brettadams0/technest",
+    "description": "A full-stack electronics store in framework-free PHP: catalog, cart, transactional checkout, order lifecycle and an admin analytics dashboard.",
+    "type": "project",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Brett Adams",
+            "homepage": "https://brettadams0.github.io"
+        }
+    ],
+    "require": {
+        "php": ">=8.2",
+        "ext-mbstring": "*",
+        "ext-pdo": "*",
+        "ext-session": "*"
+    },
+    "require-dev": {
+        "friendsofphp/php-cs-fixer": "^3.64",
+        "phpstan/phpstan": "^2.0",
+        "phpstan/phpstan-phpunit": "^2.0",
+        "phpunit/phpunit": "^11.4"
+    },
+    "suggest": {
+        "ext-pdo_sqlite": "Zero-configuration local demo database",
+        "ext-pdo_mysql": "Production database"
+    },
+    "autoload": {
+        "psr-4": {
+            "TechNest\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "TechNest\\Tests\\": "tests/"
+        }
+    },
+    "config": {
+        "sort-packages": true,
+        "optimize-autoloader": true,
+        "platform": {
+            "php": "8.2.0"
+        }
+    },
+    "scripts": {
+        "setup": [
+            "@php bin/technest db:setup",
+            "@php -r \"echo PHP_EOL, 'Start the store with: composer serve', PHP_EOL;\""
+        ],
+        "serve": [
+            "Composer\\Config::disableProcessTimeout",
+            "@php -S 127.0.0.1:8000 -t public public/index.php"
+        ],
+        "test": "phpunit",
+        "analyse": "phpstan analyse --memory-limit=1G",
+        "lint": "php-cs-fixer fix --dry-run --diff",
+        "fix": "php-cs-fixer fix",
+        "check": [
+            "@lint",
+            "@analyse",
+            "@test"
+        ]
+    },
+    "scripts-descriptions": {
+        "setup": "Create the database schema and seed the demo catalog",
+        "serve": "Run the store on http://127.0.0.1:8000 with PHP's built-in server",
+        "test": "Run the PHPUnit suites",
+        "analyse": "Run PHPStan",
+        "lint": "Check code style without changing anything",
+        "fix": "Apply code style fixes",
+        "check": "Everything CI runs: lint, static analysis and tests"
+    }
+}

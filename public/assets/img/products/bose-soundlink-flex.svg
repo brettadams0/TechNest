@@ -1,0 +1,31 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 600" role="img" aria-label="Bose SoundLink Flex">
+<defs>
+<radialGradient id="bg" cx="50%" cy="35%" r="80%">
+<stop offset="0" stop-color="#fff1f2"/>
+<stop offset="1" stop-color="#fecdd3"/>
+</radialGradient>
+<linearGradient id="screen" x1="0" y1="0" x2="1" y2="1">
+<stop offset="0" stop-color="#818cf8"/>
+<stop offset="1" stop-color="#f472b6"/>
+</linearGradient>
+<linearGradient id="sheen" x1="0" y1="0" x2="1" y2="1">
+<stop offset="0" stop-color="#fff" stop-opacity=".45"/>
+<stop offset=".45" stop-color="#fff" stop-opacity="0"/>
+</linearGradient>
+<linearGradient id="metal" x1="0" y1="0" x2="1" y2="1">
+<stop offset="0" stop-color="#f8fafc"/>
+<stop offset="1" stop-color="#cbd5e1"/>
+</linearGradient>
+<filter id="blur" x="-30%" y="-30%" width="160%" height="160%"><feGaussianBlur stdDeviation="12"/></filter>
+</defs>
+<rect width="600" height="600" fill="url(#bg)"/>
+<circle cx="470" cy="120" r="90" fill="#e11d48" opacity=".08"/>
+<circle cx="110" cy="470" r="70" fill="#e11d48" opacity=".07"/>
+<ellipse cx="300" cy="505" rx="190" ry="20" fill="#0f172a" opacity=".22" filter="url(#blur)"/>
+<rect x="150" y="214" width="300" height="196" rx="72" fill="#1f2937"/>
+<rect x="164" y="228" width="272" height="168" rx="62" fill="#0f172a" opacity=".12"/>
+<g fill="#0f172a" opacity=".35"><circle cx="186" cy="256" r="4.2"/><circle cx="203" cy="256" r="4.2"/><circle cx="221" cy="256" r="4.2"/><circle cx="238" cy="256" r="4.2"/><circle cx="256" cy="256" r="4.2"/><circle cx="273" cy="256" r="4.2"/><circle cx="291" cy="256" r="4.2"/><circle cx="308" cy="256" r="4.2"/><circle cx="326" cy="256" r="4.2"/><circle cx="343" cy="256" r="4.2"/><circle cx="361" cy="256" r="4.2"/><circle cx="378" cy="256" r="4.2"/><circle cx="396" cy="256" r="4.2"/><circle cx="413" cy="256" r="4.2"/><circle cx="194" cy="273" r="4.2"/><circle cx="211" cy="273" r="4.2"/><circle cx="229" cy="273" r="4.2"/><circle cx="246" cy="273" r="4.2"/><circle cx="264" cy="273" r="4.2"/><circle cx="281" cy="273" r="4.2"/><circle cx="299" cy="273" r="4.2"/><circle cx="316" cy="273" r="4.2"/><circle cx="334" cy="273" r="4.2"/><circle cx="351" cy="273" r="4.2"/><circle cx="369" cy="273" r="4.2"/><circle cx="386" cy="273" r="4.2"/><circle cx="404" cy="273" r="4.2"/><circle cx="421" cy="273" r="4.2"/><circle cx="186" cy="290" r="4.2"/><circle cx="203" cy="290" r="4.2"/><circle cx="221" cy="290" r="4.2"/><circle cx="238" cy="290" r="4.2"/><circle cx="256" cy="290" r="4.2"/><circle cx="273" cy="290" r="4.2"/><circle cx="291" cy="290" r="4.2"/><circle cx="308" cy="290" r="4.2"/><circle cx="326" cy="290" r="4.2"/><circle cx="343" cy="290" r="4.2"/><circle cx="361" cy="290" r="4.2"/><circle cx="378" cy="290" r="4.2"/><circle cx="396" cy="290" r="4.2"/><circle cx="413" cy="290" r="4.2"/><circle cx="194" cy="307" r="4.2"/><circle cx="211" cy="307" r="4.2"/><circle cx="229" cy="307" r="4.2"/><circle cx="246" cy="307" r="4.2"/><circle cx="264" cy="307" r="4.2"/><circle cx="281" cy="307" r="4.2"/><circle cx="299" cy="307" r="4.2"/><circle cx="316" cy="307" r="4.2"/><circle cx="334" cy="307" r="4.2"/><circle cx="351" cy="307" r="4.2"/><circle cx="369" cy="307" r="4.2"/><circle cx="386" cy="307" r="4.2"/><circle cx="404" cy="307" r="4.2"/><circle cx="421" cy="307" r="4.2"/><circle cx="186" cy="324" r="4.2"/><circle cx="203" cy="324" r="4.2"/><circle cx="221" cy="324" r="4.2"/><circle cx="238" cy="324" r="4.2"/><circle cx="256" cy="324" r="4.2"/><circle cx="273" cy="324" r="4.2"/><circle cx="291" cy="324" r="4.2"/><circle cx="308" cy="324" r="4.2"/><circle cx="326" cy="324" r="4.2"/><circle cx="343" cy="324" r="4.2"/><circle cx="361" cy="324" r="4.2"/><circle cx="378" cy="324" r="4.2"/><circle cx="396" cy="324" r="4.2"/><circle cx="413" cy="324" r="4.2"/><circle cx="194" cy="341" r="4.2"/><circle cx="211" cy="341" r="4.2"/><circle cx="229" cy="341" r="4.2"/><circle cx="246" cy="341" r="4.2"/><circle cx="264" cy="341" r="4.2"/><circle cx="281" cy="341" r="4.2"/><circle cx="299" cy="341" r="4.2"/><circle cx="316" cy="341" r="4.2"/><circle cx="334" cy="341" r="4.2"/><circle cx="351" cy="341" r="4.2"/><circle cx="369" cy="341" r="4.2"/><circle cx="386" cy="341" r="4.2"/><circle cx="404" cy="341" r="4.2"/><circle cx="421" cy="341" r="4.2"/></g>
+<rect x="268" y="196" width="64" height="18" rx="9" fill="#334155"/>
+<rect x="430" y="276" width="34" height="60" rx="17" fill="#334155"/>
+<path d="M164 300 Q164 228 236 228 H300 L164 360 Z" fill="url(#sheen)" opacity=".6"/>
+</svg>

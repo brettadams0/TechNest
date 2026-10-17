@@ -1,0 +1,163 @@
+#!/usr/bin/env php
+<?php
+
+declare(strict_types=1);
+
+/*
+ * TechNest command line.
+ *
+ *   php bin/technest db:setup            migrate, and seed if the catalog is empty
+ *   php bin/technest db:migrate          apply pending migrations
+ *   php bin/technest db:seed             seed the catalog (and demo data outside production)
+ *   php bin/technest db:reset [--force]  drop everything and set up again
+ *   php bin/technest user:create <username> <email> [--admin]
+ *   php bin/technest user:grant-admin <username>
+ */
+
+use TechNest\Catalog\ProductRepository;
+use TechNest\Checkout\PriceCalculator;
+use TechNest\Config;
+use TechNest\Database\Database;
+use TechNest\Database\Migrator;
+use TechNest\Database\Seeder;
+use TechNest\Order\OrderRepository;
+use TechNest\Support\SystemClock;
+use TechNest\User\UserRepository;
+
+$root = dirname(__DIR__);
+require $root . '/vendor/autoload.php';
+
+$args = array_slice($argv, 1);
+$command = array_shift($args) ?? 'help';
+$flags = array_values(array_filter($args, static fn(string $a): bool => str_starts_with($a, '--')));
+$args = array_values(array_filter($args, static fn(string $a): bool => !str_starts_with($a, '--')));
+
+function out(string $line): void
+{
+    fwrite(STDOUT, $line . PHP_EOL);
+}
+
+function fail(string $line): never
+{
+    fwrite(STDERR, "error: {$line}" . PHP_EOL);
+    exit(1);
+}
+
+$config = Config::fromEnvironment($root);
+$clock = new SystemClock();
+
+try {
+    $db = Database::connect($config, $root);
+} catch (Throwable $e) {
+    fail($e->getMessage());
+}
+
+$migrator = new Migrator($db, $root . '/database/migrations', $clock);
+$users = new UserRepository($db, $clock);
+$seeder = new Seeder($db, $clock, $root . '/database/seed/catalog.php');
+
+$seed = static function () use ($seeder, $config, $db, $clock, $users): void {
+    if ($seeder->hasCatalog()) {
+        out('Catalog already present; nothing seeded.');
+
+        return;
+    }
+
+    out(sprintf('Seeded %d products.', $seeder->seedCatalog()));
+
+    if ($config->isProduction()) {
+        out('APP_ENV=production: demo accounts and orders skipped. Create an admin with user:create --admin.');
+
+        return;
+    }
+
+    $orders = $seeder->seedDemo($users, new ProductRepository($db, $clock), new OrderRepository($db), new PriceCalculator());
+    out(sprintf('Seeded %d demo orders.', $orders));
+    out(sprintf('Demo admin:    %s / %s', Seeder::DEMO_ADMIN[0], Seeder::DEMO_ADMIN[2]));
+    out(sprintf('Demo customer: %s / %s', Seeder::DEMO_CUSTOMER[0], Seeder::DEMO_CUSTOMER[2]));
+};
+
+$readPassword = static function (): string {
+    $fromEnv = getenv('TECHNEST_PASSWORD');
+    if (is_string($fromEnv) && $fromEnv !== '') {
+        return $fromEnv;
+    }
+    fwrite(STDOUT, 'Password (min 10 characters): ');
+    if (stream_isatty(STDIN)) {
+        shell_exec('stty -echo');
+    }
+    $password = rtrim((string) fgets(STDIN), "\r\n");
+    if (stream_isatty(STDIN)) {
+        shell_exec('stty echo');
+        fwrite(STDOUT, PHP_EOL);
+    }
+
+    return $password;
+};
+
+try {
+    switch ($command) {
+        case 'db:migrate':
+            $ran = $migrator->migrate();
+            out($ran === [] ? 'Nothing to migrate.' : 'Applied: ' . implode(', ', $ran));
+            break;
+
+        case 'db:seed':
+            $seed();
+            break;
+
+        case 'db:setup':
+            $ran = $migrator->migrate();
+            out($ran === [] ? 'Schema up to date.' : 'Applied: ' . implode(', ', $ran));
+            $seed();
+            out('Database ready.');
+            break;
+
+        case 'db:reset':
+            if ($config->isProduction() && !in_array('--force', $flags, true)) {
+                fail('refusing to drop a production database without --force');
+            }
+            $migrator->dropAll();
+            out('Dropped all tables.');
+            out('Applied: ' . implode(', ', $migrator->migrate()));
+            $seed();
+            break;
+
+        case 'user:create':
+            [$username, $email] = $args + [null, null];
+            if ($username === null || $email === null) {
+                fail('usage: user:create <username> <email> [--admin]');
+            }
+            $password = $readPassword();
+            if (strlen($password) < 10) {
+                fail('password must be at least 10 characters');
+            }
+            $user = $users->create($username, strtolower($email), password_hash($password, PASSWORD_DEFAULT));
+            if (in_array('--admin', $flags, true)) {
+                $users->grantAdmin($user->id, null);
+            }
+            out("Created {$user->username}" . (in_array('--admin', $flags, true) ? ' (admin).' : '.'));
+            break;
+
+        case 'user:grant-admin':
+            $user = $users->findByUsername($args[0] ?? '') ?? fail('no such user');
+            $users->grantAdmin($user->id, null);
+            out("{$user->username} is now an administrator.");
+            break;
+
+        default:
+            out(<<<'HELP'
+                TechNest CLI
+
+                  db:setup                         migrate, and seed if the catalog is empty
+                  db:migrate                       apply pending migrations
+                  db:seed                          seed the catalog (and demo data outside production)
+                  db:reset [--force]               drop all tables and set up again
+                  user:create <user> <email> [--admin]
+                                                   password from TECHNEST_PASSWORD or a prompt
+                  user:grant-admin <user>
+                HELP);
+    }
+} catch (Throwable $e) {
+    fail($e->getMessage());
+}

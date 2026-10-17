@@ -1,0 +1,36 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 600" role="img" aria-label="Canon EOS R10">
+<defs>
+<radialGradient id="bg" cx="50%" cy="35%" r="80%">
+<stop offset="0" stop-color="#fffbeb"/>
+<stop offset="1" stop-color="#fde68a"/>
+</radialGradient>
+<linearGradient id="screen" x1="0" y1="0" x2="1" y2="1">
+<stop offset="0" stop-color="#818cf8"/>
+<stop offset="1" stop-color="#f472b6"/>
+</linearGradient>
+<linearGradient id="sheen" x1="0" y1="0" x2="1" y2="1">
+<stop offset="0" stop-color="#fff" stop-opacity=".45"/>
+<stop offset=".45" stop-color="#fff" stop-opacity="0"/>
+</linearGradient>
+<linearGradient id="metal" x1="0" y1="0" x2="1" y2="1">
+<stop offset="0" stop-color="#f8fafc"/>
+<stop offset="1" stop-color="#cbd5e1"/>
+</linearGradient>
+<filter id="blur" x="-30%" y="-30%" width="160%" height="160%"><feGaussianBlur stdDeviation="12"/></filter>
+</defs>
+<rect width="600" height="600" fill="url(#bg)"/>
+<circle cx="470" cy="120" r="90" fill="#d97706" opacity=".08"/>
+<circle cx="110" cy="470" r="70" fill="#d97706" opacity=".07"/>
+<ellipse cx="300" cy="505" rx="190" ry="20" fill="#0f172a" opacity=".22" filter="url(#blur)"/>
+<path d="M248 170 H352 L370 206 H230 Z" fill="#1f2937"/>
+<rect x="128" y="200" width="344" height="222" rx="28" fill="#1f2937"/>
+<path d="M128 228 Q128 200 156 200 H206 V422 H156 Q128 422 128 394 Z" fill="#111827"/>
+<rect x="164" y="178" width="38" height="22" rx="6" fill="#334155"/>
+<circle cx="322" cy="312" r="98" fill="#0b0f19"/>
+<circle cx="322" cy="312" r="84" fill="#1e293b"/>
+<circle cx="322" cy="312" r="84" fill="none" stroke="#dc2626" stroke-width="5"/>
+<circle cx="322" cy="312" r="60" fill="#0f172a"/>
+<circle cx="322" cy="312" r="38" fill="#1e3a8a" opacity=".55"/>
+<circle cx="302" cy="292" r="14" fill="#bfdbfe" opacity=".55"/>
+<text x="160" y="250" font-family="Helvetica, Arial, sans-serif" font-weight="700" font-size="14" fill="#e2e8f0" opacity=".8">EOS</text>
+</svg>

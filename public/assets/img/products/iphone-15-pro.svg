@@ -1,0 +1,37 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 600" role="img" aria-label="iPhone 15 Pro">
+<defs>
+<radialGradient id="bg" cx="50%" cy="35%" r="80%">
+<stop offset="0" stop-color="#eef2ff"/>
+<stop offset="1" stop-color="#c7d2fe"/>
+</radialGradient>
+<linearGradient id="screen" x1="0" y1="0" x2="1" y2="1">
+<stop offset="0" stop-color="#6366f1"/>
+<stop offset="1" stop-color="#ec4899"/>
+</linearGradient>
+<linearGradient id="sheen" x1="0" y1="0" x2="1" y2="1">
+<stop offset="0" stop-color="#fff" stop-opacity=".45"/>
+<stop offset=".45" stop-color="#fff" stop-opacity="0"/>
+</linearGradient>
+<linearGradient id="metal" x1="0" y1="0" x2="1" y2="1">
+<stop offset="0" stop-color="#f8fafc"/>
+<stop offset="1" stop-color="#cbd5e1"/>
+</linearGradient>
+<filter id="blur" x="-30%" y="-30%" width="160%" height="160%"><feGaussianBlur stdDeviation="12"/></filter>
+</defs>
+<rect width="600" height="600" fill="url(#bg)"/>
+<circle cx="470" cy="120" r="90" fill="#6366f1" opacity=".08"/>
+<circle cx="110" cy="470" r="70" fill="#6366f1" opacity=".07"/>
+<ellipse cx="300" cy="505" rx="190" ry="20" fill="#0f172a" opacity=".22" filter="url(#blur)"/>
+<rect x="208" y="112" width="184" height="372" rx="38" fill="url(#metal)"/>
+<rect x="216" y="120" width="168" height="356" rx="31" fill="#0b0f19"/>
+<rect x="222" y="126" width="156" height="344" rx="26" fill="url(#screen)"/>
+<rect x="266" y="138" width="68" height="18" rx="9" fill="#0b0f19"/>
+<rect x="242" y="196" width="116" height="10" rx="5" fill="#fff" opacity=".7"/>
+<rect x="242" y="214" width="76" height="8" rx="4" fill="#fff" opacity=".45"/>
+<g fill="#fff" opacity=".85">
+<rect x="242" y="384" width="30" height="30" rx="9"/><rect x="285" y="384" width="30" height="30" rx="9"/><rect x="328" y="384" width="30" height="30" rx="9"/>
+<rect x="242" y="342" width="30" height="30" rx="9" opacity=".7"/><rect x="285" y="342" width="30" height="30" rx="9" opacity=".7"/><rect x="328" y="342" width="30" height="30" rx="9" opacity=".7"/>
+</g>
+<rect x="268" y="452" width="64" height="5" rx="2.5" fill="#fff" opacity=".8"/>
+<path d="M222 152 Q222 126 248 126 H330 L222 300 Z" fill="url(#sheen)"/>
+</svg>
