@@ -1,0 +1,33 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 600" role="img" aria-label="Xbox Series X">
+<defs>
+<radialGradient id="bg" cx="50%" cy="35%" r="80%">
+<stop offset="0" stop-color="#fff7ed"/>
+<stop offset="1" stop-color="#fed7aa"/>
+</radialGradient>
+<linearGradient id="screen" x1="0" y1="0" x2="1" y2="1">
+<stop offset="0" stop-color="#818cf8"/>
+<stop offset="1" stop-color="#f472b6"/>
+</linearGradient>
+<linearGradient id="sheen" x1="0" y1="0" x2="1" y2="1">
+<stop offset="0" stop-color="#fff" stop-opacity=".45"/>
+<stop offset=".45" stop-color="#fff" stop-opacity="0"/>
+</linearGradient>
+<linearGradient id="metal" x1="0" y1="0" x2="1" y2="1">
+<stop offset="0" stop-color="#f8fafc"/>
+<stop offset="1" stop-color="#cbd5e1"/>
+</linearGradient>
+<filter id="blur" x="-30%" y="-30%" width="160%" height="160%"><feGaussianBlur stdDeviation="12"/></filter>
+</defs>
+<rect width="600" height="600" fill="url(#bg)"/>
+<circle cx="470" cy="120" r="90" fill="#ea580c" opacity=".08"/>
+<circle cx="110" cy="470" r="70" fill="#ea580c" opacity=".07"/>
+<ellipse cx="300" cy="505" rx="190" ry="20" fill="#0f172a" opacity=".22" filter="url(#blur)"/>
+<path d="M218 150 L262 112 H424 L380 150 Z" fill="#334155"/>
+<ellipse cx="322" cy="131" rx="58" ry="14" fill="#16a34a" opacity=".85"/>
+<g fill="#0b0f19" opacity=".9"><circle cx="268" cy="136" r="3"/><circle cx="273" cy="145" r="3"/><circle cx="278" cy="154" r="3"/><circle cx="279" cy="136" r="3"/><circle cx="284" cy="145" r="3"/><circle cx="289" cy="154" r="3"/><circle cx="290" cy="136" r="3"/><circle cx="295" cy="145" r="3"/><circle cx="300" cy="154" r="3"/><circle cx="301" cy="136" r="3"/><circle cx="306" cy="145" r="3"/><circle cx="311" cy="154" r="3"/><circle cx="312" cy="136" r="3"/><circle cx="317" cy="145" r="3"/><circle cx="322" cy="154" r="3"/><circle cx="323" cy="136" r="3"/><circle cx="328" cy="145" r="3"/><circle cx="333" cy="154" r="3"/><circle cx="334" cy="136" r="3"/><circle cx="339" cy="145" r="3"/><circle cx="344" cy="154" r="3"/></g>
+<path d="M380 150 L424 112 V440 L380 478 Z" fill="#111827"/>
+<rect x="218" y="150" width="162" height="328" rx="4" fill="#1f2937"/>
+<circle cx="242" cy="176" r="8" fill="#e2e8f0"/>
+<rect x="236" y="438" width="40" height="8" rx="4" fill="#0b0f19"/>
+<path d="M218 150 H300 L218 300 Z" fill="url(#sheen)" opacity=".25"/>
+</svg>

@@ -1,0 +1,131 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  quality:
+    name: Code style & static analysis
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+          coverage: none
+
+      - run: composer validate --strict
+
+      - uses: ramsey/composer-install@v3
+
+      - name: php-cs-fixer (PER-CS 2.0)
+        run: composer lint
+
+      - name: PHPStan (level max)
+        run: composer analyse
+
+  tests-sqlite:
+    name: Tests · PHP ${{ matrix.php }} · SQLite
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        php: ['8.2', '8.3', '8.4', '8.5']
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ matrix.php }}
+          extensions: pdo_sqlite, mbstring
+          coverage: ${{ matrix.php == '8.3' && 'pcov' || 'none' }}
+
+      - uses: ramsey/composer-install@v3
+
+      - name: PHPUnit
+        if: matrix.php != '8.3'
+        run: vendor/bin/phpunit
+
+      - name: PHPUnit with coverage
+        if: matrix.php == '8.3'
+        run: vendor/bin/phpunit --coverage-text --only-summary-for-coverage-text
+
+      # The quality job pins 8.3; PHPStan's view of the code also depends on
+      # the runtime (8.5 stopped registering $argv by default), so check the
+      # newest one too.
+      - name: PHPStan on the newest PHP
+        if: matrix.php == '8.5'
+        run: composer analyse
+
+  tests-mysql:
+    name: Tests · PHP 8.3 · MySQL 8.4
+    runs-on: ubuntu-latest
+    services:
+      mysql:
+        image: mysql:8.4
+        env:
+          MYSQL_ROOT_PASSWORD: ci-root
+          MYSQL_DATABASE: technest_test
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="mysqladmin ping -h 127.0.0.1 -pci-root"
+          --health-interval=5s
+          --health-timeout=5s
+          --health-retries=30
+    env:
+      TEST_DB_DRIVER: mysql
+      TEST_DB_HOST: 127.0.0.1
+      TEST_DB_NAME: technest_test
+      TEST_DB_USER: root
+      TEST_DB_PASS: ci-root
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+          extensions: pdo_mysql, mbstring
+          coverage: none
+
+      - uses: ramsey/composer-install@v3
+
+      - name: PHPUnit against MySQL
+        run: vendor/bin/phpunit
+
+  docker:
+    name: Docker image builds and serves the store
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build
+        run: docker build -t technest:ci .
+
+      - name: Run with the zero-configuration SQLite database
+        run: docker run -d --name technest -p 8080:80 technest:ci
+
+      - name: Smoke test
+        run: |
+          for i in $(seq 1 30); do
+            if curl -fsS http://localhost:8080/health; then break; fi
+            sleep 1
+          done
+          curl -fsS http://localhost:8080/health | grep -q '"status": "ok"'
+          curl -fsS -o /dev/null http://localhost:8080/
+          curl -fsS -o /dev/null http://localhost:8080/products/iphone-15-pro
+          curl -fsSI http://localhost:8080/ | grep -qi "content-security-policy"
+
+      - name: Container logs
+        if: always()
+        run: docker logs technest

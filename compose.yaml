@@ -1,0 +1,40 @@
+# The store on Apache + PHP 8.3 against MySQL 8.4:
+#
+#   docker compose up --build      →  http://localhost:8080
+#
+# The database password below is for a throwaway database that exists only
+# inside this compose network — the db service publishes no port.
+
+services:
+  app:
+    build: .
+    ports:
+      - "8080:80"
+    environment:
+      APP_ENV: local
+      DB_DRIVER: mysql
+      DB_HOST: db
+      DB_NAME: technest
+      DB_USER: technest
+      DB_PASS: local-compose-only
+    depends_on:
+      db:
+        condition: service_healthy
+
+  db:
+    image: mysql:8.4
+    environment:
+      MYSQL_DATABASE: technest
+      MYSQL_USER: technest
+      MYSQL_PASSWORD: local-compose-only
+      MYSQL_RANDOM_ROOT_PASSWORD: "yes"
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "127.0.0.1", "-utechnest", "-plocal-compose-only"]
+      interval: 5s
+      timeout: 5s
+      retries: 30
+    volumes:
+      - db-data:/var/lib/mysql
+
+volumes:
+  db-data:

@@ -1,0 +1,31 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 600" role="img" aria-label="WD My Passport 2TB">
+<defs>
+<radialGradient id="bg" cx="50%" cy="35%" r="80%">
+<stop offset="0" stop-color="#f0fdfa"/>
+<stop offset="1" stop-color="#99f6e4"/>
+</radialGradient>
+<linearGradient id="screen" x1="0" y1="0" x2="1" y2="1">
+<stop offset="0" stop-color="#818cf8"/>
+<stop offset="1" stop-color="#f472b6"/>
+</linearGradient>
+<linearGradient id="sheen" x1="0" y1="0" x2="1" y2="1">
+<stop offset="0" stop-color="#fff" stop-opacity=".45"/>
+<stop offset=".45" stop-color="#fff" stop-opacity="0"/>
+</linearGradient>
+<linearGradient id="metal" x1="0" y1="0" x2="1" y2="1">
+<stop offset="0" stop-color="#f8fafc"/>
+<stop offset="1" stop-color="#cbd5e1"/>
+</linearGradient>
+<filter id="blur" x="-30%" y="-30%" width="160%" height="160%"><feGaussianBlur stdDeviation="12"/></filter>
+</defs>
+<rect width="600" height="600" fill="url(#bg)"/>
+<circle cx="470" cy="120" r="90" fill="#0d9488" opacity=".08"/>
+<circle cx="110" cy="470" r="70" fill="#0d9488" opacity=".07"/>
+<ellipse cx="300" cy="505" rx="190" ry="20" fill="#0f172a" opacity=".22" filter="url(#blur)"/>
+<rect x="186" y="128" width="228" height="344" rx="26" fill="#2563eb"/>
+<path d="M186 310 H414 V446 Q414 472 388 472 H212 Q186 472 186 446 Z" fill="#0f172a" opacity=".18"/>
+<g stroke="#fff" stroke-opacity=".18" stroke-width="7" stroke-linecap="round"><path d="M214 310 L196 462" /><path d="M234 310 L216 462" /><path d="M254 310 L236 462" /><path d="M274 310 L256 462" /><path d="M294 310 L276 462" /><path d="M314 310 L296 462" /><path d="M334 310 L316 462" /><path d="M354 310 L336 462" /><path d="M374 310 L356 462" /></g>
+<circle cx="386" cy="160" r="6" fill="#f8fafc"/>
+<text x="214" y="176" font-family="Helvetica, Arial, sans-serif" font-weight="700" font-size="18" fill="#fff" opacity=".85">WD</text>
+<path d="M200 160 Q200 142 220 142 H330 L200 290 Z" fill="url(#sheen)" opacity=".45"/>
+</svg>

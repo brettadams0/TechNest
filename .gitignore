@@ -1,8 +1,9 @@
-vendor/
-composer.lock
-*.log
+/vendor/
+/var/*
+!/var/.gitkeep
 .env
-config.local.php
+.phpunit.result.cache
 .idea/
-.vs/
+.vscode/
 .DS_Store
+*.log

@@ -1,0 +1,10 @@
+.git
+.github
+vendor
+var/*
+!var/.gitkeep
+tests
+tools
+docs
+.env
+*.md
