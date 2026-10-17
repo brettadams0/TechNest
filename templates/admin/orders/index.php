@@ -22,7 +22,7 @@ $link = fn (int $page): string => $this->url('/admin/orders', array_filter(['sta
 </nav>
 
 <section class="card">
-    <?php if ($orders->items === []): ?>
+    <?php if ($orders->total === 0): ?>
         <p class="muted">No orders <?= $status !== null ? 'with this status' : 'yet' ?>.</p>
     <?php else: ?>
         <?= $this->insert('admin/orders/table', ['orders' => $orders->items]) ?>

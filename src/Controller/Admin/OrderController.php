@@ -28,10 +28,15 @@ final class OrderController
     public function index(Request $request): Response
     {
         $status = OrderStatus::tryFrom($request->query('status'));
-        $page = max(1, (int) $request->query('page', '1'));
+        $orders = $this->orders->paginate($status, $request->queryPage());
+        if ($orders->page > $orders->lastPage()) {
+            $params = array_filter(['status' => $status?->value, 'page' => $orders->lastPage() > 1 ? $orders->lastPage() : null]);
+
+            return Response::redirect('/admin/orders' . ($params === [] ? '' : '?' . http_build_query($params)));
+        }
 
         return Response::html($this->view->render('admin/orders/index', [
-            'orders' => $this->orders->paginate($status, $page),
+            'orders' => $orders,
             'status' => $status,
             'counts' => $this->orders->countByStatus(),
         ]));

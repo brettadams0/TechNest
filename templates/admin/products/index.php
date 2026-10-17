@@ -44,6 +44,7 @@ $this->layout('admin/shell', ['title' => 'Products']);
                         <a class="icon-button" href="/admin/products/<?= $product->id ?>/edit" aria-label="Edit <?= $this->e($product->name) ?>"><?= $this->icon('edit') ?></a>
                         <form method="post" action="/admin/products/<?= $product->id ?>/archive"<?= $product->isActive ? ' data-confirm="Archive ' . $this->e($product->name) . '? It will be hidden from the store but kept in order history."' : '' ?>>
                             <?= $this->csrfField() ?>
+                            <input type="hidden" name="archived" value="<?= $product->isActive ? '1' : '0' ?>">
                             <button type="submit" class="icon-button" aria-label="<?= $product->isActive ? 'Archive' : 'Restore' ?> <?= $this->e($product->name) ?>" title="<?= $product->isActive ? 'Archive' : 'Restore' ?>"><?= $this->icon('archive') ?></button>
                         </form>
                     </td>

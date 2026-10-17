@@ -14,12 +14,13 @@ final class Str
         return trim($value, '-');
     }
 
+    /** At most $length characters (not bytes, so "é" is never cut in half). */
     public static function limit(string $value, int $length): string
     {
-        if (strlen($value) <= $length) {
+        if (mb_strlen($value) <= $length) {
             return $value;
         }
 
-        return rtrim(substr($value, 0, $length - 1)) . '…';
+        return rtrim(mb_substr($value, 0, $length - 1)) . '…';
     }
 }

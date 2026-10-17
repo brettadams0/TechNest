@@ -135,16 +135,22 @@ final class View
     }
 
     /**
-     * aria-invalid/aria-describedby for a form control with an error, so
-     * screen readers announce the message with the field.
+     * aria-invalid/aria-describedby for a form control, so screen readers
+     * announce its hint and, after a failed submit, its error with it. A
+     * control has one aria-describedby (a second is ignored), so hints are
+     * passed in here rather than written on the element.
      *
      * @param array<string, string> $errors
      */
-    public function fieldState(array $errors, string $field): string
+    public function fieldState(array $errors, string $field, string ...$hintIds): string
     {
-        return isset($errors[$field])
-            ? ' aria-invalid="true" aria-describedby="' . $this->e($field) . '-error"'
-            : '';
+        $describedBy = $hintIds;
+        if (isset($errors[$field])) {
+            $describedBy[] = $field . '-error';
+        }
+
+        return (isset($errors[$field]) ? ' aria-invalid="true"' : '')
+            . ($describedBy === [] ? '' : ' aria-describedby="' . $this->e(implode(' ', $describedBy)) . '"');
     }
 
     /**

@@ -37,11 +37,19 @@ final class ShopController
             $category = $this->categories->findBySlug($query->category) ?? throw HttpException::notFound('That category does not exist.');
         }
 
+        $results = $this->products->search($query);
+        if ($query->page > $results->lastPage()) {
+            // A stale link past the end, e.g. after products were archived.
+            $params = $query->params(['page' => $results->lastPage()]);
+
+            return Response::redirect('/catalog' . ($params === [] ? '' : '?' . http_build_query($params)));
+        }
+
         return Response::html($this->view->render('shop/catalog', [
             'query' => $query,
             'category' => $category,
             'categories' => $this->categories->all(),
-            'results' => $this->products->search($query),
+            'results' => $results,
         ]));
     }
 

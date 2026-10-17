@@ -21,6 +21,11 @@ final class HttpException extends RuntimeException
         parent::__construct($message !== '' ? $message : self::defaultMessage($status), $status);
     }
 
+    public static function badRequest(string $message = ''): self
+    {
+        return new self(400, $message);
+    }
+
     public static function notFound(string $message = ''): self
     {
         return new self(404, $message);

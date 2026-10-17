@@ -18,6 +18,8 @@ final class AuthFlowTest extends HttpTestCase
         $this->assertStatus(422, $response);
         $this->assertSee('Enter a valid email address.', $response);
         $this->assertSee('Password must be at least 10 characters.', $response);
+        // One aria-describedby naming both, or screen readers skip the error.
+        self::assertStringContainsString('aria-invalid="true" aria-describedby="password-hint password-error"', $response->body);
 
         $response = $this->post('/register', ['username' => 'TAKEN', 'email' => 'new@example.com', 'password' => 'long-enough-1', 'password_confirmation' => 'long-enough-1']);
         $this->assertSee('That username is taken.', $response);

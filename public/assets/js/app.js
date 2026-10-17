@@ -27,8 +27,10 @@
     }
   });
 
-  // Controls marked data-autosubmit submit their form on change, so sort,
-  // filters and cart quantities need no separate button with JS enabled.
+  // Controls marked data-autosubmit submit their form on change, so filters
+  // and cart quantities need no separate button with JS enabled. Never put it
+  // on a <select>: arrow keys change a select's value, so keyboard users
+  // could not move past the first option.
   document.querySelectorAll('[data-autosubmit]').forEach(function (control) {
     control.addEventListener('change', function () {
       if (control.form) {

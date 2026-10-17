@@ -98,6 +98,31 @@ final class Request
     }
 
     /**
+     * A page number from the query string, 1 to $max. Anything else (missing,
+     * negative, not a number, absurdly large) is page 1 or $max, never a
+     * number that would overflow an OFFSET.
+     */
+    public function queryPage(int $max = 1000): int
+    {
+        $page = $this->query('page', '1');
+        if (preg_match('/^\d+$/', $page) !== 1) {
+            return 1;
+        }
+
+        return strlen(ltrim($page, '0')) > 6 ? $max : max(1, min((int) $page, $max));
+    }
+
+    /** A 0/1 form field as a bool, or null when it is missing or anything else. */
+    public function inputFlag(string $key): ?bool
+    {
+        return match ($this->input($key)) {
+            '1' => true,
+            '0' => false,
+            default => null,
+        };
+    }
+
+    /**
      * An array of integers from the form, e.g. options[Color]=12. Anything
      * that is not a plain integer is dropped rather than coerced.
      *

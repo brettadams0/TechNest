@@ -349,7 +349,7 @@ final class Application
             $r->post('/admin/products', [Controller\Admin\ProductController::class, 'store']);
             $r->get('/admin/products/{id:\d+}/edit', [Controller\Admin\ProductController::class, 'edit']);
             $r->post('/admin/products/{id:\d+}', [Controller\Admin\ProductController::class, 'update']);
-            $r->post('/admin/products/{id:\d+}/archive', [Controller\Admin\ProductController::class, 'toggleArchived']);
+            $r->post('/admin/products/{id:\d+}/archive', [Controller\Admin\ProductController::class, 'setArchived']);
             $r->post('/admin/products/{id:\d+}/options', [Controller\Admin\ProductController::class, 'addOption']);
             $r->post('/admin/products/{id:\d+}/options/{optionId:\d+}/delete', [Controller\Admin\ProductController::class, 'deleteOption']);
 
@@ -358,8 +358,8 @@ final class Application
             $r->post('/admin/orders/{id:\d+}/status', [Controller\Admin\OrderController::class, 'updateStatus']);
 
             $r->get('/admin/users', [Controller\Admin\UserController::class, 'index']);
-            $r->post('/admin/users/{id:\d+}/active', [Controller\Admin\UserController::class, 'toggleActive']);
-            $r->post('/admin/users/{id:\d+}/admin', [Controller\Admin\UserController::class, 'toggleAdmin']);
+            $r->post('/admin/users/{id:\d+}/active', [Controller\Admin\UserController::class, 'setActive']);
+            $r->post('/admin/users/{id:\d+}/admin', [Controller\Admin\UserController::class, 'setAdmin']);
 
             $r->get('/admin/themes', [Controller\Admin\ThemeController::class, 'index']);
             $r->post('/admin/themes', [Controller\Admin\ThemeController::class, 'activate']);

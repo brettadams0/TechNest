@@ -28,7 +28,7 @@ $this->layout('layout', ['title' => 'Create an account']);
         </div>
         <div class="field">
             <label for="password">Password</label>
-            <input id="password" name="password" type="password" autocomplete="new-password" required minlength="10" aria-describedby="password-hint"<?= $this->fieldState($errors, 'password') ?>>
+            <input id="password" name="password" type="password" autocomplete="new-password" required minlength="10"<?= $this->fieldState($errors, 'password', 'password-hint') ?>>
             <p class="field__hint" id="password-hint">At least 10 characters.</p>
             <?= $this->insert('partials/field-error', ['errors' => $errors, 'field' => 'password']) ?>
         </div>

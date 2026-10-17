@@ -86,13 +86,23 @@ final class ProductController
         return Response::redirect("/admin/products/{$product->id}/edit");
     }
 
-    public function toggleArchived(Request $request, string $id): Response
+    /**
+     * The form says which state it wants (archived=1 or 0) rather than asking
+     * for a flip, so a repeated or stale submission cannot undo the action.
+     */
+    public function setArchived(Request $request, string $id): Response
     {
         $product = $this->find($id);
-        $this->products->setActive($product->id, !$product->isActive);
-        $this->flash->success($product->isActive
-            ? "{$product->name} is archived: hidden from the store, kept in order history."
-            : "{$product->name} is back on sale.");
+        $archive = $request->inputFlag('archived') ?? throw HttpException::badRequest();
+
+        if ($archive === !$product->isActive) {
+            $this->flash->info($archive ? "{$product->name} is already archived." : "{$product->name} is already on sale.");
+        } else {
+            $this->products->setActive($product->id, !$archive);
+            $this->flash->success($archive
+                ? "{$product->name} is archived: hidden from the store, kept in order history."
+                : "{$product->name} is back on sale.");
+        }
 
         return Response::redirect('/admin/products');
     }
@@ -105,6 +115,11 @@ final class ProductController
         $value = $v->string('value', 'Choice', 1, 60);
         $extra = $v->money('extra', 'Extra price');
 
+        // The group name becomes part of a form field name, options[<group>],
+        // where PHP would cut it at the first "]".
+        if (strpbrk($group, '[]') !== false) {
+            $v->addError('group', 'Option names cannot contain square brackets.');
+        }
         if (!$v->fails() && $this->products->optionExists($product->id, $group, $value)) {
             $v->addError('value', "{$group}: {$value} already exists.");
         }

@@ -34,14 +34,13 @@ final class CatalogQuery
     public static function fromRequest(Request $request): self
     {
         $sort = $request->query('sort', 'featured');
-        $page = (int) $request->query('page', '1');
 
         return new self(
             search: mb_substr($request->query('q'), 0, 100),
             category: preg_match('/^[a-z0-9-]{1,60}$/', $request->query('category')) === 1 ? $request->query('category') : '',
             sort: array_key_exists($sort, self::SORTS) ? $sort : 'featured',
             inStockOnly: $request->query('in_stock') === '1',
-            page: max(1, min($page, 1000)),
+            page: $request->queryPage(),
         );
     }
 

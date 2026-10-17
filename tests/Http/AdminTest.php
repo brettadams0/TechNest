@@ -96,17 +96,40 @@ final class AdminTest extends HttpTestCase
         self::assertSame(50, $this->fixtures->stock($product->id));
     }
 
+    public function testOptionGroupNamesCannotBreakTheProductForm(): void
+    {
+        // "options[Size [in]]" would reach PHP as the key "Size [in".
+        $product = $this->fixtures->product();
+
+        $this->post("/admin/products/{$product->id}/options", ['group' => 'Size [in]', 'value' => 'Big', 'extra' => '0']);
+
+        $this->assertSee('Option names cannot contain square brackets.', $this->get("/admin/products/{$product->id}/edit"));
+        self::assertSame(0, $this->fixtures->count('product_options'));
+    }
+
+    public function testOrderPagesPastTheEndRedirectInsteadOfFailing(): void
+    {
+        $this->assertRedirect('/admin/orders', $this->get('/admin/orders?page=99999999999999999999'));
+        $this->assertRedirect('/admin/orders?status=shipped', $this->get('/admin/orders?status=shipped&page=4'));
+    }
+
     public function testArchivingHidesAProductWithoutDeletingIt(): void
     {
         $product = $this->fixtures->product(['slug' => 'to-archive']);
 
-        $this->post("/admin/products/{$product->id}/archive");
+        $this->post("/admin/products/{$product->id}/archive", ['archived' => '1']);
 
         $this->assertStatus(404, $this->get('/products/to-archive'));
         self::assertSame(1, $this->fixtures->count('products'));
 
-        $this->post("/admin/products/{$product->id}/archive");
+        // A second submission, e.g. from a stale tab, does not undo it.
+        $this->post("/admin/products/{$product->id}/archive", ['archived' => '1']);
+        $this->assertSee('is already archived', $this->get('/admin/products'));
+        $this->assertStatus(404, $this->get('/products/to-archive'));
+
+        $this->post("/admin/products/{$product->id}/archive", ['archived' => '0']);
         $this->assertStatus(200, $this->get('/products/to-archive'));
+        $this->assertStatus(400, $this->post("/admin/products/{$product->id}/archive"));
     }
 
     public function testOrderStatusFollowsTheStateMachine(): void
@@ -129,8 +152,8 @@ final class AdminTest extends HttpTestCase
 
     public function testAdminsCannotLockThemselvesOut(): void
     {
-        $this->post("/admin/users/{$this->admin->id}/active");
-        $this->post("/admin/users/{$this->admin->id}/admin");
+        $this->post("/admin/users/{$this->admin->id}/active", ['active' => '0']);
+        $this->post("/admin/users/{$this->admin->id}/admin", ['admin' => '0']);
 
         $page = $this->get('/admin/users');
         $this->assertStatus(200, $page);
@@ -142,11 +165,26 @@ final class AdminTest extends HttpTestCase
     {
         $user = $this->fixtures->user('promotee');
 
-        $this->post("/admin/users/{$user->id}/admin");
+        $this->post("/admin/users/{$user->id}/admin", ['admin' => '1']);
         self::assertSame($this->admin->id, $this->db->fetchInt('SELECT granted_by FROM admins WHERE user_id = ?', [$user->id]));
 
-        $this->post("/admin/users/{$user->id}/admin");
+        $this->post("/admin/users/{$user->id}/admin", ['admin' => '0']);
         self::assertSame(0, $this->db->fetchInt('SELECT COUNT(*) FROM admins WHERE user_id = ?', [$user->id]));
+
+        // Repeating a revoke from a stale page does not re-grant.
+        $this->post("/admin/users/{$user->id}/admin", ['admin' => '0']);
+        self::assertSame(0, $this->db->fetchInt('SELECT COUNT(*) FROM admins WHERE user_id = ?', [$user->id]));
+    }
+
+    public function testDisablingTwiceLeavesTheAccountDisabled(): void
+    {
+        $user = $this->fixtures->user('troll');
+
+        $this->post("/admin/users/{$user->id}/active", ['active' => '0']);
+        $this->post("/admin/users/{$user->id}/active", ['active' => '0']);
+
+        self::assertSame(0, $this->db->fetchInt('SELECT is_active FROM users WHERE id = ?', [$user->id]));
+        $this->assertSee('troll is already disabled.', $this->get('/admin/users'));
     }
 
     public function testSwitchingTheme(): void

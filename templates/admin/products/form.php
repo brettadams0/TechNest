@@ -51,7 +51,7 @@ $featured = $old !== [] ? $this->old($old, 'is_featured') === '1' : ($product->i
             </div>
             <div class="field field--full">
                 <label for="slug">URL</label>
-                <div class="input-prefix"><span>/products/</span><input id="slug" name="slug" maxlength="120" value="<?= $this->e($slug) ?>" placeholder="generated from the name" aria-describedby="slug-hint"<?= $this->fieldState($errors, 'slug') ?>></div>
+                <div class="input-prefix"><span>/products/</span><input id="slug" name="slug" maxlength="120" value="<?= $this->e($slug) ?>" placeholder="generated from the name"<?= $this->fieldState($errors, 'slug', 'slug-hint') ?>></div>
                 <p class="field__hint" id="slug-hint">Leave blank to generate it from the name.</p>
                 <?= $this->insert('partials/field-error', ['errors' => $errors, 'field' => 'slug']) ?>
             </div>

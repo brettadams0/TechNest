@@ -33,10 +33,12 @@ $this->layout('admin/shell', ['title' => 'Customers']);
                         <?php if (!$self): ?>
                             <form method="post" action="/admin/users/<?= $u->id ?>/admin" data-confirm="<?= $row['is_admin'] ? 'Remove admin access from ' : 'Make ' ?><?= $this->e($u->username) ?><?= $row['is_admin'] ? '?' : ' an administrator?' ?>">
                                 <?= $this->csrfField() ?>
+                                <input type="hidden" name="admin" value="<?= $row['is_admin'] ? '0' : '1' ?>">
                                 <button type="submit" class="button button--ghost button--sm"><?= $row['is_admin'] ? 'Revoke admin' : 'Make admin' ?></button>
                             </form>
                             <form method="post" action="/admin/users/<?= $u->id ?>/active"<?= $u->isActive ? ' data-confirm="Disable ' . $this->e($u->username) . '? They will be signed out."' : '' ?>>
                                 <?= $this->csrfField() ?>
+                                <input type="hidden" name="active" value="<?= $u->isActive ? '0' : '1' ?>">
                                 <button type="submit" class="button button--ghost button--sm<?= $u->isActive ? ' button--danger-text' : '' ?>"><?= $u->isActive ? 'Disable' : 'Enable' ?></button>
                             </form>
                         <?php endif ?>

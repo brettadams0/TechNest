@@ -366,7 +366,8 @@ input[type="checkbox"], input[type="radio"] { width: auto; min-height: 0; accent
 .empty--compact { padding: 32px 20px; border: 0; }
 .empty__icon { width: 44px; height: 44px; margin: 0 auto 12px; color: var(--muted); }
 
-.table-wrap { overflow-x: auto; margin: 0 -24px; padding: 0 24px; }
+/* Positioned so absolutely positioned content (visually-hidden labels) is clipped by the scroll box. */
+.table-wrap { position: relative; overflow-x: auto; margin: 0 -24px; padding: 0 24px; }
 .table { width: 100%; border-collapse: collapse; font-size: 0.92rem; }
 .table th { text-align: left; font-size: 0.75rem; font-weight: 650; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted); padding: 10px 12px; border-bottom: 1px solid var(--border); white-space: nowrap; }
 .table td { padding: 12px; border-bottom: 1px solid var(--border); vertical-align: middle; }
@@ -444,7 +445,8 @@ input[type="checkbox"], input[type="radio"] { width: auto; min-height: 0; accent
 .catalog__controls { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; }
 
 .pagination { display: flex; align-items: center; justify-content: center; gap: 12px; margin-top: 36px; flex-wrap: wrap; }
-.pagination ol { list-style: none; display: flex; gap: 4px; margin: 0; padding: 0; }
+.pagination ol { list-style: none; display: flex; flex-wrap: wrap; justify-content: center; gap: 4px; margin: 0; padding: 0; }
+.pagination__gap { display: grid; place-items: center; min-width: 24px; height: 40px; color: var(--muted); }
 .pagination ol a { display: grid; place-items: center; min-width: 40px; height: 40px; border-radius: var(--radius-sm); text-decoration: none; color: var(--text); font-weight: 600; }
 .pagination ol a:hover { background: var(--surface-2); }
 .pagination ol a[aria-current] { background: var(--primary); color: var(--on-primary); }
@@ -657,11 +659,13 @@ input[type="checkbox"], input[type="radio"] { width: auto; min-height: 0; accent
 }
 
 @media (max-width: 900px) {
-    .nav-toggle { display: inline-grid; }
+    .js .nav-toggle { display: inline-grid; }
     .site-header__inner { flex-wrap: wrap; gap: 12px; padding-top: 12px; padding-bottom: 12px; }
     .search { order: 3; flex-basis: 100%; max-width: none; }
-    .site-nav { display: none; order: 4; flex-basis: 100%; flex-direction: column; align-items: stretch; padding-bottom: 8px; }
-    .site-nav.is-open { display: flex; }
+    /* Collapsed behind the toggle only when app.js is there to open it. */
+    .site-nav { order: 4; flex-basis: 100%; flex-direction: column; align-items: stretch; padding-bottom: 8px; }
+    .js .site-nav { display: none; }
+    .js .site-nav.is-open { display: flex; }
     .site-nav a, .site-nav .link-button { width: 100%; padding: 12px; }
     .cart-link { justify-content: flex-start; }
 
@@ -705,7 +709,8 @@ input[type="checkbox"], input[type="radio"] { width: auto; min-height: 0; accent
     .cart-line__media { grid-area: media; }
     .cart-line__media img { width: 64px; height: 64px; }
     .cart-line__info { grid-area: info; }
-    .cart-line__qty { grid-area: qty; max-width: 120px; }
+    .cart-line__qty { grid-area: qty; }
+    .js .cart-line__qty { max-width: 120px; }
     .cart-line__total { grid-area: total; }
     .cart-line > form:last-child { grid-area: remove; }
     .progress { padding: 16px 8px; font-size: 0.8rem; }

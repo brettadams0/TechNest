@@ -59,13 +59,14 @@ $link = fn (int $page): string => $this->url('/catalog', $query->params(['page' 
                 </label>
                 <label class="select-label">
                     <span>Sort</span>
-                    <select name="sort" data-autosubmit>
+                    <select name="sort">
                         <?php foreach (\TechNest\Catalog\CatalogQuery::SORTS as $value => $label): ?>
                             <option value="<?= $this->e($value) ?>"<?= $query->sort === $value ? ' selected' : '' ?>><?= $this->e($label) ?></option>
                         <?php endforeach ?>
                     </select>
                 </label>
-                <button type="submit" class="button button--ghost no-js-only">Apply</button>
+                <?php /* Sorting waits for Apply: a select that submits on change reloads the page on every arrow key. */ ?>
+                <button type="submit" class="button button--ghost">Apply</button>
             </form>
         </div>
 

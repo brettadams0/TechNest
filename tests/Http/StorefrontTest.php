@@ -32,6 +32,12 @@ final class StorefrontTest extends HttpTestCase
         $this->assertDontSee('Pixel Test', $response);
     }
 
+    public function testAPagePastTheEndRedirectsToTheLastOne(): void
+    {
+        // A stale link, e.g. after products were archived.
+        $this->assertRedirect('/catalog?category=audio', $this->get('/catalog?category=audio&page=5'));
+    }
+
     public function testArchivedProductsAre404(): void
     {
         $this->assertStatus(404, $this->get('/products/hidden-gadget'));
