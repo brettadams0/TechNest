@@ -354,6 +354,8 @@ input[type="checkbox"], input[type="radio"] { width: auto; min-height: 0; accent
 
 .page-title { margin-bottom: 0.25em; }
 .page-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; flex-wrap: wrap; margin-bottom: 24px; }
+/* The heading block wraps its own text before it pushes the actions down. */
+.page-head > div:first-child { flex: 1 1 320px; min-width: 0; }
 .page-head__actions { display: flex; gap: 10px; flex-wrap: wrap; }
 
 .breadcrumbs { display: flex; align-items: center; flex-wrap: wrap; gap: 6px; font-size: 0.875rem; color: var(--muted); margin-bottom: 20px; }
