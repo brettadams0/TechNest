@@ -259,6 +259,7 @@ final class Application
             $c->get(UserRepository::class),
             $c->get(Session::class),
             $c->get(Flash::class),
+            $c->get(LoginThrottle::class),
         ));
         $c->set(Controller\AccountController::class, static fn(Container $c) => new Controller\AccountController(
             $c->get(View::class),

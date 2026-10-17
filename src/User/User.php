@@ -14,6 +14,7 @@ final class User
         public readonly string $email,
         public readonly bool $isActive,
         public readonly string $createdAt,
+        public readonly int $sessionVersion = 0,
     ) {}
 
     /** @param array<string, mixed> $row */
@@ -25,6 +26,7 @@ final class User
             Row::string($row, 'email'),
             Row::bool($row, 'is_active'),
             Row::string($row, 'created_at'),
+            isset($row['session_version']) ? Row::int($row, 'session_version') : 0,
         );
     }
 }

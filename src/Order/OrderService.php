@@ -21,11 +21,21 @@ final class OrderService
         private readonly Clock $clock,
     ) {}
 
-    /** @throws InvalidTransition */
-    public function transition(int $orderId, OrderStatus $to, ?int $actorId): Order
+    /**
+     * @param OrderStatus|null $requiredFrom only apply the change if the order
+     *                                       is still in this state, for callers
+     *                                       that checked it before calling
+     *
+     * @throws InvalidTransition
+     */
+    public function transition(int $orderId, OrderStatus $to, ?int $actorId, ?OrderStatus $requiredFrom = null): Order
     {
-        return $this->db->transaction(function () use ($orderId, $to, $actorId): Order {
+        return $this->db->transaction(function () use ($orderId, $to, $actorId, $requiredFrom): Order {
             $order = $this->orders->find($orderId) ?? throw new InvalidTransition('That order does not exist.');
+
+            if ($requiredFrom !== null && $order->status !== $requiredFrom) {
+                throw new InvalidTransition("Order {$order->number()} is now {$order->status->value}, so it was not changed.");
+            }
 
             if (!$order->status->canTransitionTo($to)) {
                 throw new InvalidTransition(sprintf(
@@ -62,6 +72,9 @@ final class OrderService
             throw new InvalidTransition("Order {$order->number()} is already {$order->status->value} and can no longer be cancelled online.");
         }
 
-        return $this->transition($order->id, OrderStatus::Cancelled, $userId);
+        // Pass the status we just checked: an admin may move the order on
+        // between this read and the transaction, and a customer must not be
+        // able to cancel an order that has started processing.
+        return $this->transition($order->id, OrderStatus::Cancelled, $userId, $order->status);
     }
 }

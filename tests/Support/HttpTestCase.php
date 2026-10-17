@@ -59,6 +59,7 @@ abstract class HttpTestCase extends DatabaseTestCase
     protected function actingAs(User $user): void
     {
         $this->session->set('user_id', $user->id);
+        $this->session->set('session_version', $user->sessionVersion);
     }
 
     protected function assertStatus(int $expected, Response $response): void

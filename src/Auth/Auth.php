@@ -12,17 +12,22 @@ use TechNest\User\UserRepository;
 
 /**
  * Who is making this request. The user is re-read from the database on every
- * request rather than trusted from the session, so disabling an account or
- * revoking admin rights takes effect on that user's very next click.
+ * request rather than trusted from the session, so disabling an account,
+ * revoking admin rights or changing the password takes effect on every
+ * other session of that account at its very next click.
  */
 final class Auth
 {
     private const SESSION_KEY = 'user_id';
+    private const SESSION_VERSION_KEY = 'session_version';
 
     /**
      * A real bcrypt hash of a throwaway string. Unknown usernames are checked
      * against it so that "no such user" takes as long as "wrong password" and
-     * response timing does not reveal which accounts exist.
+     * response timing does not reveal which accounts exist. Its cost is
+     * rewritten to the runtime default by timingHash(): PHP 8.4 raised that
+     * default from 10 to 12, and a fixed cost-10 dummy would then answer four
+     * times faster than a real account.
      */
     private const TIMING_HASH = '$2y$10$Fr.b8kllN/pq3xsxoTQAVeJGMsgH6R/ZtvBntkzzYiDlxF9hAdd3K';
 
@@ -39,25 +44,28 @@ final class Auth
 
     public function attempt(string $login, string $password, string $ip): LoginResult
     {
-        $wait = $this->throttle->secondsUntilAllowed($login, $ip);
+        // Throttle the account the login resolves to, not the text typed:
+        // the database matches several spellings to one row.
+        $found = $this->users->findForLogin($login);
+        $scope = $found === null ? LoginThrottle::inputScope($login) : LoginThrottle::accountScope($found[0]->id);
+
+        $wait = $this->throttle->reserve($scope, $ip);
         if ($wait > 0) {
             return LoginResult::throttled($wait);
         }
 
-        $found = $this->users->findForLogin($login);
         if ($found === null) {
-            password_verify($password, self::TIMING_HASH);
-            $this->throttle->recordFailure($login, $ip);
+            password_verify($password, self::timingHash());
 
             return LoginResult::invalid();
         }
 
         [$user, $hash] = $found;
         if (!password_verify($password, $hash)) {
-            $this->throttle->recordFailure($login, $ip);
-
             return LoginResult::invalid();
         }
+
+        $this->throttle->clear($scope, $ip);
 
         // Only reveal "disabled" to someone who proved they know the password.
         if (!$user->isActive) {
@@ -68,10 +76,38 @@ final class Auth
             $this->users->updatePasswordHash($user->id, password_hash($password, PASSWORD_DEFAULT));
         }
 
-        $this->throttle->clear($login, $ip);
         $this->login($user);
 
         return LoginResult::success($user);
+    }
+
+    /**
+     * Re-check a signed-in user's password (before changing it), through the
+     * same throttle as login: otherwise anyone holding a hijacked session
+     * could brute-force the password here without limit.
+     */
+    public function confirmPassword(User $user, string $password, string $ip): LoginResult
+    {
+        $scope = LoginThrottle::accountScope($user->id);
+        $wait = $this->throttle->reserve($scope, $ip);
+        if ($wait > 0) {
+            return LoginResult::throttled($wait);
+        }
+
+        $hash = $this->users->passwordHash($user->id);
+        if ($hash === null || !password_verify($password, $hash)) {
+            return LoginResult::invalid();
+        }
+
+        $this->throttle->clear($scope, $ip);
+
+        return LoginResult::success($user);
+    }
+
+    /** The dummy hash at the cost PHP currently uses for real ones. */
+    public static function timingHash(): string
+    {
+        return sprintf('$2y$%02d$', PASSWORD_BCRYPT_DEFAULT_COST) . substr(self::TIMING_HASH, 7);
     }
 
     public function login(User $user): void
@@ -79,6 +115,7 @@ final class Auth
         $this->session->regenerate();
         $this->csrf->rotate();
         $this->session->set(self::SESSION_KEY, $user->id);
+        $this->session->set(self::SESSION_VERSION_KEY, $user->sessionVersion);
         $this->user = $user;
         $this->resolved = true;
         $this->admin = null;
@@ -105,8 +142,9 @@ final class Auth
         }
 
         $user = $this->users->find($id);
-        if ($user === null || !$user->isActive) {
-            // Account deleted or disabled since login: end the session now.
+        if ($user === null || !$user->isActive || $this->session->get(self::SESSION_VERSION_KEY) !== $user->sessionVersion) {
+            // Account deleted or disabled, or its password changed elsewhere,
+            // since this session signed in: end it now.
             $this->logout();
 
             return null;
@@ -133,12 +171,5 @@ final class Auth
         }
 
         return $this->admin ??= $this->users->isAdmin($user->id);
-    }
-
-    public function verifyPassword(User $user, string $password): bool
-    {
-        $hash = $this->users->passwordHash($user->id);
-
-        return $hash !== null && password_verify($password, $hash);
     }
 }

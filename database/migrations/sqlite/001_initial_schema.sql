@@ -13,6 +13,8 @@ CREATE TABLE users (
     email         TEXT    NOT NULL COLLATE NOCASE UNIQUE,
     password_hash TEXT    NOT NULL,
     is_active     INTEGER NOT NULL DEFAULT 1 CHECK (is_active IN (0, 1)),
+    -- Bumped on password change; sessions holding an older value end.
+    session_version INTEGER NOT NULL DEFAULT 0,
     created_at    TEXT    NOT NULL
 );
 

@@ -10,7 +10,7 @@ use TechNest\Support\Clock;
 
 final class UserRepository
 {
-    private const COLUMNS = 'id, username, email, is_active, created_at';
+    private const COLUMNS = 'id, username, email, is_active, created_at, session_version';
 
     public function __construct(
         private readonly Database $db,
@@ -73,9 +73,22 @@ final class UserRepository
         return $this->find($id) ?? throw new \LogicException('User vanished after insert');
     }
 
+    /** Store a re-hash of the same password (e.g. after a cost change). */
     public function updatePasswordHash(int $id, string $hash): void
     {
         $this->db->execute('UPDATE users SET password_hash = ? WHERE id = ?', [$hash, $id]);
+    }
+
+    /**
+     * Set a new password and bump the session version, which signs out every
+     * other session of the account on its next request.
+     */
+    public function changePassword(int $id, string $hash): void
+    {
+        $this->db->execute(
+            'UPDATE users SET password_hash = ?, session_version = session_version + 1 WHERE id = ?',
+            [$hash, $id],
+        );
     }
 
     public function setActive(int $id, bool $active): void

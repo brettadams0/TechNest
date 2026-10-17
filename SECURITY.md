@@ -19,9 +19,10 @@ sensitive email adamsbrett00@gmail.com.
 | Cross-site scripting | Every template value escaped with `View::e()`; a strict CSP blocks inline script and style; tests render pages with hostile product data | `View`, `SecurityHeaders`, `SecurityTest` |
 | Clickjacking | `frame-ancestors 'none'` and `X-Frame-Options: DENY` | `SecurityHeaders` |
 | Session fixation | Session id regenerated on login, logout and password change; strict mode; `HttpOnly`, `SameSite=Lax`, `Secure` over HTTPS | `NativeSession`, `Auth` |
-| Password guessing | 5 failures per username+IP per 15 minutes, stored in the database | `LoginThrottle` |
-| Account enumeration | Same message for unknown user and wrong password; unknown users are checked against a dummy bcrypt hash so timing matches | `Auth::attempt()` |
+| Password guessing | 5 failures per account+IP per 15 minutes, stored in the database. Keyed on the account the login resolved to, so the username, the email and every spelling the database collation matches share one budget. Each attempt is reserved before the password is checked, so concurrent requests cannot all slip past the count. Confirming the current password before changing it draws on the same budget | `LoginThrottle`, `Auth` |
+| Account enumeration | Same message for unknown user and wrong password; unknown users are checked against a dummy bcrypt hash at the runtime's default cost, so timing matches on every PHP version. Registration only says an email is taken once the username is free, and saying so is throttled per IP | `Auth::attempt()`, `AuthController::register()` |
 | Stale access after a ban | The user is reloaded every request; a disabled account is signed out immediately | `Auth::user()` |
+| A stolen session outliving a password change | Each account has a session version, bumped on password change; sessions holding an older one are signed out on their next request | `Auth::user()`, `UserRepository::changePassword()` |
 | Open redirect after login | `?next=` and the stored intended URL accept same-site paths only | `SafeRedirect` |
 | Price tampering | The session stores no prices; totals are recomputed from the database inside the checkout transaction; option ids are validated against the product | `Cart`, `CartPricer`, `OptionSelection` |
 | Overselling under concurrency | Stock is taken with an atomic conditional update inside the order transaction | `CheckoutService` |
@@ -46,7 +47,10 @@ They are created only when `APP_ENV` is not `production`, and the CLI refuses to
 
 ## Known gaps
 
-- Throttling is per username+IP: it slows targeted guessing, not a distributed attack across many
-  accounts. There is no CAPTCHA.
+- Throttling is per account+IP: it slows targeted guessing, not a distributed attack across many
+  accounts or IPs. There is no CAPTCHA.
+- Registration still has to say when an email already has an account, since there is no mail
+  service to send "you already have an account" to instead. That answer is limited to five per IP
+  per 15 minutes.
 - There is no email verification or password reset, because there is no mail service.
 - Sessions use PHP's file storage, which suits a single server only.

@@ -13,6 +13,8 @@ CREATE TABLE users (
     email         VARCHAR(190) NOT NULL,
     password_hash VARCHAR(255) NOT NULL,
     is_active     TINYINT(1)   NOT NULL DEFAULT 1,
+    -- Bumped on password change; sessions holding an older value end.
+    session_version INT UNSIGNED NOT NULL DEFAULT 0,
     created_at    DATETIME     NOT NULL,
     UNIQUE KEY users_username (username),
     UNIQUE KEY users_email (email)

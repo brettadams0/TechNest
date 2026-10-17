@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace TechNest\Controller;
 
 use TechNest\Auth\Auth;
+use TechNest\Auth\LoginOutcome;
 use TechNest\Http\HttpException;
 use TechNest\Http\Request;
 use TechNest\Http\Response;
@@ -64,8 +65,11 @@ final class AccountController
         $user = $this->user();
         $v = new Validator($request->body);
 
-        if (!$this->auth->verifyPassword($user, $request->input('current_password'))) {
-            $v->addError('current_password', 'Your current password is not correct.');
+        $check = $this->auth->confirmPassword($user, $request->input('current_password'), $request->ip());
+        if (!$check->succeeded()) {
+            $v->addError('current_password', $check->outcome === LoginOutcome::Throttled
+                ? $check->message()
+                : 'Your current password is not correct.');
         }
         $password = $v->password('password', 10, 'New password');
         $v->matches('password_confirmation', 'password', 'The new passwords do not match.');
@@ -75,11 +79,13 @@ final class AccountController
                 'user' => $user,
                 'orders' => $this->orders->forUser($user->id),
                 'errors' => $v->errors(),
-            ]), 422);
+            ]), $check->outcome === LoginOutcome::Throttled ? 429 : 422);
         }
 
-        $this->users->updatePasswordHash($user->id, password_hash($password, PASSWORD_DEFAULT));
-        $this->auth->login($user);
+        // Bumps the account's session version, which signs out every other
+        // session; this one is re-issued against the new version.
+        $this->users->changePassword($user->id, password_hash($password, PASSWORD_DEFAULT));
+        $this->auth->login($this->users->find($user->id) ?? $user);
         $this->flash->success('Your password has been changed.');
 
         return Response::redirect('/account');

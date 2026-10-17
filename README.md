@@ -83,10 +83,11 @@ The parts worth reading, and where to find them:
   third-party resources. A test renders every page, as a guest and as an admin, and fails on any
   inline style, inline script, event-handler attribute or off-site asset.
 - **Authentication details that are easy to get wrong**: session id regenerated on every privilege
-  change, login throttled per username+IP in the database (not the session, which an attacker can
-  discard), unknown usernames checked against a dummy bcrypt hash so timing does not reveal which
-  accounts exist, disabled accounts cut off on their next request, and `?next=` redirects limited
-  to same-site paths.
+  change; login throttled per account+IP in the database (not the session, which an attacker can
+  discard), with each attempt reserved before bcrypt runs so a burst of parallel guesses cannot
+  overshoot the limit; unknown usernames checked against a dummy hash at the runtime's bcrypt cost
+  so timing does not reveal which accounts exist; disabled accounts and sessions from before a
+  password change cut off on their next request; and `?next=` redirects limited to same-site paths.
 - **Money is integer cents end to end** — [`Money`](src/Support/Money.php) parses typed amounts like
   `1,199.99` without ever passing through a float.
 - **Portable SQL.** One set of queries runs on SQLite (the zero-configuration default) and MySQL 8
@@ -188,8 +189,8 @@ Worth being clear about, since this is a demo rather than a business:
 - **One currency, one tax rule.** Prices are CAD with Ontario's 13% HST applied to every order.
 - **Single-server sessions.** PHP's file sessions are fine on one machine; running several would need
   a shared session store.
-- **Throttling is per username and IP**, which slows targeted guessing but not a distributed attack
-  across many usernames; there is no CAPTCHA.
+- **Throttling is per account and IP**, which slows targeted guessing but not a distributed attack
+  across many accounts; there is no CAPTCHA.
 - **No image uploads**, by choice: admins pick from the artwork that ships with the store, so no
   user-supplied file ever lands in the web root.
 

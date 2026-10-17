@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace TechNest\Tests\Http;
 
+use TechNest\Security\LoginThrottle;
 use TechNest\Tests\Support\Fixtures;
 use TechNest\Tests\Support\HttpTestCase;
 
@@ -80,8 +81,52 @@ final class AuthFlowTest extends HttpTestCase
         $this->assertSee('Your current password is not correct.', $response);
 
         $this->assertRedirect('/account', $this->post('/account/password', ['current_password' => Fixtures::PASSWORD, 'password' => 'brand-new-pass', 'password_confirmation' => 'brand-new-pass']));
+        // The session that changed the password stays signed in.
+        $this->assertStatus(200, $this->get('/account'));
         $this->post('/logout');
         $this->assertRedirect('/account', $this->post('/login', ['login' => 'xena', 'password' => 'brand-new-pass']));
+    }
+
+    public function testGuessingTheCurrentPasswordIsThrottled(): void
+    {
+        $this->actingAs($this->fixtures->user('zed'));
+        $guess = ['current_password' => 'guess', 'password' => 'brand-new-pass', 'password_confirmation' => 'brand-new-pass'];
+        for ($i = 0; $i < LoginThrottle::MAX_FAILURES; ++$i) {
+            $this->assertStatus(422, $this->post('/account/password', $guess));
+        }
+
+        $response = $this->post('/account/password', ['current_password' => Fixtures::PASSWORD] + $guess);
+
+        $this->assertStatus(429, $response);
+        $this->assertSee('Too many failed attempts.', $response);
+    }
+
+    public function testRegistrationOnlyRevealsATakenEmailWhenTheUsernameIsFree(): void
+    {
+        $this->fixtures->user('owner');
+        $form = ['password' => 'long-enough-1', 'password_confirmation' => 'long-enough-1'];
+
+        $response = $this->post('/register', ['username' => 'owner', 'email' => 'owner@example.com'] + $form);
+        $this->assertSee('That username is taken.', $response);
+        $this->assertDontSee('An account already uses that email.', $response);
+
+        $response = $this->post('/register', ['username' => 'fresh', 'email' => 'owner@example.com'] + $form);
+        $this->assertSee('An account already uses that email.', $response);
+    }
+
+    public function testCheckingEmailsThroughRegistrationIsThrottled(): void
+    {
+        $this->fixtures->user('owner');
+        $form = ['username' => 'fresh', 'email' => 'owner@example.com', 'password' => 'long-enough-1', 'password_confirmation' => 'long-enough-1'];
+        for ($i = 0; $i < LoginThrottle::MAX_FAILURES; ++$i) {
+            $this->assertStatus(422, $this->post('/register', $form));
+        }
+
+        $response = $this->post('/register', ['email' => 'someone-new@example.com'] + $form);
+
+        $this->assertStatus(429, $response);
+        $this->assertSee('Too many failed attempts.', $response);
+        self::assertSame(1, $this->db->fetchInt('SELECT COUNT(*) FROM users'));
     }
 
     public function testADisabledUserIsSignedOutOnTheirNextRequest(): void

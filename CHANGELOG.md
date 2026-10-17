@@ -23,7 +23,9 @@ A rebuild of the original coursework into a production-shaped application. Highl
 
 ### Added
 - CSRF protection enforced for every non-GET request, route-level guards, a strict
-  Content-Security-Policy and security headers, login throttling, safe post-login redirects.
+  Content-Security-Policy and security headers, safe post-login redirects.
+- Login throttling per account and IP, shared by the password-change form; sessions signed out
+  when the account's password changes.
 - Transactional checkout with atomic stock decrement, price snapshots, Canadian address validation,
   shipping and HST.
 - Order lifecycle state machine with audit history, restocking on cancel, and customer cancellation.

@@ -12,6 +12,10 @@ $this->layout('layout', ['title' => 'Create an account']);
         <h1>Create an account</h1>
         <p class="muted">You will need one to check out and follow your orders.</p>
 
+        <?php if (isset($errors['form'])): ?>
+            <div class="alert alert--error" role="alert"><?= $this->icon('alert') ?><p><?= $this->e($errors['form']) ?></p></div>
+        <?php endif ?>
+
         <div class="field">
             <label for="username">Username</label>
             <input id="username" name="username" autocomplete="username" required minlength="3" maxlength="30" value="<?= $this->e($this->old($old, 'username')) ?>"<?= $this->fieldState($errors, 'username') ?>>

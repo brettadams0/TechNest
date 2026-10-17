@@ -107,6 +107,21 @@ final class OrderServiceTest extends DatabaseTestCase
         $this->service->cancelByCustomer($this->orderId, $this->customer->id);
     }
 
+    public function testAGuardedTransitionRefusesAnOrderThatMovedOn(): void
+    {
+        // The customer's cancel checked "pending", then an admin started
+        // processing before the cancel's transaction ran.
+        $this->service->transition($this->orderId, OrderStatus::Processing, $this->admin->id);
+
+        try {
+            $this->service->transition($this->orderId, OrderStatus::Cancelled, $this->customer->id, OrderStatus::Pending);
+            self::fail('The guard must stop the cancel');
+        } catch (InvalidTransition $e) {
+            self::assertStringContainsString('is now processing', $e->getMessage());
+        }
+        self::assertSame(OrderStatus::Processing, $this->orders->find($this->orderId)?->status);
+    }
+
     public function testCompareAndSetLosesToAConcurrentChange(): void
     {
         $now = '2026-03-10 15:00:00';
