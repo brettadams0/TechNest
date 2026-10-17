@@ -28,7 +28,7 @@ $delta = static function (int $now, int $before): ?float {
 <div class="page-head">
     <div>
         <h1 class="page-title">Dashboard</h1>
-        <p class="muted">Last <?= $days ?> days, compared with the <?= $days ?> before. Cancelled orders are excluded.</p>
+        <p class="muted">Last <?= $days ?> days, compared with the same length of time before. Revenue is goods sold, before shipping and HST; cancelled orders are excluded.</p>
     </div>
     <a class="button button--secondary" href="/admin/products/new"><?= $this->icon('plus') ?> New product</a>
 </div>

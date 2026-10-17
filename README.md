@@ -159,6 +159,7 @@ Settings come from the environment, or a `.env` file — see [`.env.example`](.e
 |---|---|---|
 | `APP_ENV` | `local` | `production` disables demo seeding and error detail |
 | `APP_DEBUG` | on outside production | show exception messages on error pages |
+| `APP_TIMEZONE` | `America/Toronto` | dates on screen, and the days the dashboard reports by |
 | `DB_DRIVER` | `sqlite` | `sqlite` or `mysql` |
 | `DB_PATH` | `var/technest.sqlite` | SQLite only |
 | `DB_HOST`, `DB_PORT`, `DB_NAME`, `DB_USER`, `DB_PASS` | — | MySQL only; there are deliberately no defaults |

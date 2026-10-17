@@ -63,6 +63,8 @@ final class SeederTest extends DatabaseTestCase
         ));
         // Nothing is dated in the future.
         self::assertSame(0, $this->db->fetchInt('SELECT COUNT(*) FROM orders WHERE created_at > ?', ['2026-03-10 15:00:00']));
+        // Nobody ordered before they had an account.
+        self::assertSame(0, $this->db->fetchInt('SELECT COUNT(*) FROM orders o JOIN users u ON u.id = o.user_id WHERE o.created_at < u.created_at'));
 
         $admin = (new UserRepository($this->db, $this->clock))->findByUsername(Seeder::DEMO_ADMIN[0]);
         self::assertNotNull($admin);

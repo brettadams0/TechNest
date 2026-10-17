@@ -11,8 +11,10 @@ php bin/technest user:create <username> <email> --admin    # prompts for the pas
 
 ## Dashboard
 
-The dashboard covers the last 30 days and compares each headline figure with the 30 days before.
-Cancelled orders are excluded everywhere.
+The dashboard covers the last 30 days, today included, and compares each headline figure with the
+same length of time just before. Days are the store's days (`APP_TIMEZONE`), matching the dates on
+orders. Revenue means goods sold, before shipping and HST, so the category figures add up to the
+headline. Cancelled orders are excluded everywhere.
 
 - **Revenue, orders, average order, units sold, customers** — with the change against the previous
   period.

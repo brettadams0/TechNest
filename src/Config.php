@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace TechNest;
 
+use DateTimeZone;
 use RuntimeException;
 
 /**
@@ -99,6 +100,17 @@ final class Config
     public function debug(): bool
     {
         return $this->bool('APP_DEBUG', !$this->isProduction());
+    }
+
+    /** The store's timezone: dates are shown, and reports cut days, in it. */
+    public function timezone(): DateTimeZone
+    {
+        $name = $this->get('APP_TIMEZONE', 'America/Toronto');
+        if (!in_array($name, DateTimeZone::listIdentifiers(), true)) {
+            throw new RuntimeException("APP_TIMEZONE must be a timezone name like America/Toronto, got '{$name}'.");
+        }
+
+        return new DateTimeZone($name);
     }
 
     public function dbDriver(): string

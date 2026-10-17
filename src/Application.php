@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace TechNest;
 
-use DateTimeZone;
 use TechNest\Admin\Reports;
 use TechNest\Auth\Auth;
 use TechNest\Cart\Cart;
@@ -187,7 +186,7 @@ final class Application
         $c->set(CategoryRepository::class, static fn(Container $c) => new CategoryRepository($c->get(Database::class)));
         $c->set(OrderRepository::class, static fn(Container $c) => new OrderRepository($c->get(Database::class)));
         $c->set(ThemeRepository::class, static fn(Container $c) => new ThemeRepository($c->get(Database::class)));
-        $c->set(Reports::class, static fn(Container $c) => new Reports($c->get(Database::class), $c->get(Clock::class)));
+        $c->set(Reports::class, static fn(Container $c) => new Reports($c->get(Database::class), $c->get(Clock::class), $c->get(Config::class)->timezone()));
         $c->set(LoginThrottle::class, static fn(Container $c) => new LoginThrottle($c->get(Database::class), $c->get(Clock::class)));
 
         $c->set(Auth::class, static fn(Container $c) => new Auth(
@@ -228,7 +227,7 @@ final class Application
                     'pricing' => $c->get(PriceCalculator::class),
                 ];
             },
-            new DateTimeZone($this->config->get('APP_TIMEZONE', 'America/Toronto')),
+            $this->config->timezone(),
         ));
 
         // Controllers.

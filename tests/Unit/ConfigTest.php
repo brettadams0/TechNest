@@ -48,6 +48,15 @@ final class ConfigTest extends TestCase
         Config::fromArray(['DB_DRIVER' => 'mysql'])->requireMysqlCredentials();
     }
 
+    public function testTimezoneDefaultsToTorontoAndRejectsNonsense(): void
+    {
+        self::assertSame('America/Toronto', Config::fromArray([])->timezone()->getName());
+        self::assertSame('Europe/London', Config::fromArray(['APP_TIMEZONE' => 'Europe/London'])->timezone()->getName());
+
+        $this->expectException(RuntimeException::class);
+        Config::fromArray(['APP_TIMEZONE' => 'Mars/Olympus'])->timezone();
+    }
+
     public function testRejectsUnknownDrivers(): void
     {
         $this->expectException(RuntimeException::class);

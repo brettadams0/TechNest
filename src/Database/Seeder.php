@@ -118,6 +118,14 @@ final class Seeder
             $customers[] = [$user->id, new ShippingAddress($name, $street, $city, $province, $postal)];
         }
 
+        // The accounts predate the order history below, so "Member since"
+        // and "Joined" do not come after a customer's first order.
+        $seeded = [$admin->id, $demo->id, ...array_column($customers, 0)];
+        $this->db->execute(
+            'UPDATE users SET created_at = ? WHERE id IN (' . implode(', ', array_fill(0, count($seeded), '?')) . ')',
+            [$this->clock->now()->modify('-90 days')->format('Y-m-d H:i:s'), ...$seeded],
+        );
+
         $catalog = array_values(array_filter(
             $products->findMany(range(1, $this->db->fetchInt('SELECT MAX(id) FROM products'))),
             static fn(Product $p): bool => $p->isActive,
