@@ -26,7 +26,7 @@ jobs:
 
       - run: composer validate --strict
 
-      - uses: ramsey/composer-install@v3
+      - uses: ramsey/composer-install@v4
 
       - name: php-cs-fixer (PER-CS 2.0)
         run: composer lint
@@ -50,7 +50,7 @@ jobs:
           extensions: pdo_sqlite, mbstring
           coverage: ${{ matrix.php == '8.3' && 'pcov' || 'none' }}
 
-      - uses: ramsey/composer-install@v3
+      - uses: ramsey/composer-install@v4
 
       - name: PHPUnit
         if: matrix.php != '8.3'
@@ -98,7 +98,7 @@ jobs:
           extensions: pdo_mysql, mbstring
           coverage: none
 
-      - uses: ramsey/composer-install@v3
+      - uses: ramsey/composer-install@v4
 
       - name: PHPUnit against MySQL
         run: vendor/bin/phpunit
