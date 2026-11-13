@@ -49,6 +49,15 @@ The image serves plain HTTP on port 80, so HTTPS means a TLS-terminating proxy i
 `TRUSTED_PROXIES` to that proxy's address: the session cookie then gets `Secure`, HSTS is sent, and
 login throttling sees each visitor's address rather than the proxy's.
 
+### Host a public demo
+
+`render.yaml` is a Render Blueprint for the free tier: in the Render dashboard choose New, then
+Blueprint, and pick this repository. It runs the same image on SQLite, so there is no database to
+set up, and it seeds the catalog, 152 demo orders and the two demo accounts above on every start.
+Two things follow from that, by design: the demo accounts are public, and a restart puts the store
+back to its seeded state. The free tier sleeps after about 15 minutes idle, so the first visit after
+a pause takes up to a minute to wake it.
+
 ## What it does
 
 **Storefront.** Search, category filters, sorting and pagination. Products have option groups

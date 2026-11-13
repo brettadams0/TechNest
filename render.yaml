@@ -1,0 +1,29 @@
+# One-click hosting for a public demo on Render's free tier:
+#   Render dashboard -> New -> Blueprint -> pick this repository.
+# The image is the same Dockerfile used everywhere else. It runs on SQLite, applies
+# the schema and seeds the catalog and demo accounts on every start, so a restart
+# gives a clean store. Nothing here needs a secret.
+services:
+  - type: web
+    name: technest
+    runtime: docker
+    plan: free
+    dockerfilePath: ./Dockerfile
+    healthCheckPath: /health
+    envVars:
+      # Apache listens on 80; Render routes to $PORT.
+      - key: PORT
+        value: "80"
+      # "local" seeds the demo accounts and orders (the sign-in page lists them).
+      # Turn debug output off: this one is on the public internet.
+      - key: APP_ENV
+        value: local
+      - key: APP_DEBUG
+        value: "false"
+      - key: DB_DRIVER
+        value: sqlite
+      # Render's proxy is the only thing that can reach the container, so trusting it
+      # gives visitors their own address for login throttling, a Secure session
+      # cookie and HSTS.
+      - key: TRUSTED_PROXIES
+        value: "0.0.0.0/0,::/0"
